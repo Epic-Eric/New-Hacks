@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import Home from './Home';
 import Admin from './Admin';
+import Game from './Game';
 
 function App() {
     const [isGameStarted, setIsGameStarted] = useState(false);
@@ -16,6 +17,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home startGame={startGame} />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/Game" element={<Game />} />
             </Routes>
         </Router>
     );

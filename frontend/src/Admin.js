@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
-import './Admin.css'; // Import the CSS for styling
+import { useNavigate } from 'react-router-dom';
+import './Admin.css';
 
 const Admin = () => {
     const [timer, setTimer] = useState(10); // Default timer value
     const [rounds, setRounds] = useState(3); // Default rounds value
-    const [players, setPlayers] = useState(2); // Default player count
+    const [players, setPlayers] = useState(['Player 1', 'Player 2']); // Default players list
+    const navigate = useNavigate();
 
     const handleStartGame = () => {
-        console.log("Starting game with settings:", { timer, rounds, players });
-        // Logic to start the game
+        navigate('/game', { state: { timer: parseInt(timer), rounds: parseInt(rounds), players } });
     };
 
     const handleCopyLink = () => {
-        const inviteLink = "https://yourgame.com/invite"; // Replace with your actual invite link
+        const inviteLink = "https://yourgame.com/invite";
         navigator.clipboard.writeText(inviteLink);
         alert("Invite link copied to clipboard!");
+    };
+
+    const handleGoHome = () => {
+        navigate('/');
     };
 
     return (
@@ -42,10 +47,10 @@ const Admin = () => {
                 <label>
                     Players:
                     <input
-                        type="number"
-                        value={players}
-                        onChange={(e) => setPlayers(e.target.value)}
-                        min="1"
+                        type="text"
+                        placeholder="Separate player names with commas"
+                        value={players.join(', ')}
+                        onChange={(e) => setPlayers(e.target.value.split(', '))}
                     />
                 </label>
             </div>
@@ -54,6 +59,9 @@ const Admin = () => {
             </button>
             <button className="invite-button" onClick={handleCopyLink}>
                 Invite
+            </button>
+            <button className="home-button" onClick={handleGoHome}>
+                Go Back to Home
             </button>
         </div>
     );
