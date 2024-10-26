@@ -1,10 +1,10 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import './Home.css'; // Ensure to import your styles
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Home.css';
 
 const Home = ({ startGame }) => {
-    const [playerName, setPlayerName] = React.useState('');
-    const navigate = useNavigate(); // Initialize useNavigate
+    const [playerName, setPlayerName] = useState('');
+    const navigate = useNavigate();
 
     const handleStart = () => {
         if (playerName) {
@@ -13,26 +13,24 @@ const Home = ({ startGame }) => {
     };
 
     const handleCreateGame = () => {
-        // Redirect to the /admin page
         navigate('/admin');
     };
 
     return (
         <div className="home-container">
-            <h1 className="game-title">crackle.io</h1>
-            <div className="avatar-selection">
-                <span className="avatar">&#128512;</span>
+            <h1 className="game-title">crackle.io <span className="emoji">😄</span></h1>
+            <div className="name-entry">
+                <label className="name-label">
+                    Name:
+                    <input
+                        type="text"
+                        className="name-input"
+                        placeholder="Enter your name"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                    />
+                </label>
             </div>
-            <label className="name-label">
-                Name:
-                <input
-                    type="text"
-                    className="name-input"
-                    placeholder="Enter your name"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                />
-            </label>
             <div className="button-container">
                 <button className="play-button" onClick={handleStart}>
                     Play!

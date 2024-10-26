@@ -49,6 +49,10 @@
     align-items: center;
 }
 
+.player-list h2 {
+    margin-bottom: 10px;
+}
+
 .player-icons {
     display: flex;
     flex-direction: column;
@@ -109,12 +113,17 @@
     border-radius: inherit;
 }
 
+/* Centering and styling for death log */
 .death-log {
     width: 20%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: center; /* Center content */
+    text-align: center; /* Center text within */
+}
+
+.death-log h2 {
+    margin-bottom: 10px;
 }
 
 .death-log ul {
@@ -132,7 +141,7 @@
 
 .points {
     font-size: 1.1rem;
-    color: #ff6b6b; /* Distinct color for points */
+    color: #ff6b6b; /* Unique color for points */
     font-weight: bold;
     margin-top: 5px;
 }

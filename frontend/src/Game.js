@@ -67,7 +67,6 @@ const Game = () => {
                             <li key={index}>{log}</li>
                         ))}
                     </ul>
-                    {/* Test message below death log */}
                     <div className="test-message">
                         <p>Player one died</p>
                         <p className="points">+ 900 points</p>
