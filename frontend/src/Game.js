@@ -76,7 +76,7 @@ const Game = () => {
         <div className="game-container">
             {/* Title and Game Information */}
             <div className="top-bar">
-                <h1 className="game-title">crackle.io <span className="emoji">😂</span></h1>
+                <h1 className="game-title">krackle.io <span className="emoji">😂</span></h1>
                 <div className="game-info">
                     <p>Timer: {timer}s</p>
                     <p>Round: {round}</p>

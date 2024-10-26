@@ -52,7 +52,7 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <h1 className="game-title">crackle.io <span className="emoji">😄</span></h1>
+            <h1 className="game-title">krackle.io <span className="emoji">😄</span></h1>
             <div className="name-entry">
                 <label className="name-label">
                     Name:
