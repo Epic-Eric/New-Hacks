@@ -1,0 +1,41 @@
+.admin-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #5c4d98; /* Match your theme */
+    color: white;
+    font-family: 'Arial', sans-serif;
+}
+
+.settings {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+label {
+    margin: 10px 0;
+}
+
+input {
+    padding: 10px;
+    font-size: 1.2rem;
+    margin-left: 5px;
+    width: 50px; /* Adjust width as needed */
+}
+
+.start-game-button, .invite-button {
+    padding: 10px 20px;
+    font-size: 1.5rem;
+    margin: 10px;
+    cursor: pointer;
+    background-color: #48c774; /* Green for start button */
+    border: none;
+    color: white;
+}
+
+.invite-button {
+    background-color: #007bff; /* Blue for invite button */
+}
