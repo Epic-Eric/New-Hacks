@@ -6,9 +6,7 @@ import cv2
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import MaxPooling2D
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import os
 import matplotlib.pyplot as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -46,9 +44,7 @@ emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutra
 emotion_history = list()
 # start the webcam feed
 frame_rate = 5
-prev = time.time()
-start_Time = time.time()
-no_face = time.time()
+prev, start_Time, no_face = time.time(), time.time(), time.time()
 model.load_weights('backend/model.h5')
 def predict_emotion(frame):
     global no_face
@@ -74,15 +70,32 @@ def predict_emotion(frame):
 # if the model results the client is happy or surprised in the last n seconds for 1/2 of the time, then the client loses
 
 n = 3
+# grace period for the client to be happy or surprised to adjust to the game
 happySurpriseLast = list()
 cap = cv2.VideoCapture(0)
+while time.time() - start_Time < n or len(happySurpriseLast)  >= n*frame_rate/2:
+    # time for client to adjust to the game
+    time_elapsed = time.time() - prev
+    if time_elapsed > 1. / frame_rate:
+        prev = time.time()
+    else:
+        continue
+    ret, frame = cap.read()
+    if not ret:
+        break
+    emotions = predict_emotion(frame)
+    for i in emotions:
+        if i[3] + i[6] >= 0.8:
+            print("Adjust Your Face")
+    cv2.imshow('Video', cv2.resize(frame, (1600, 960), interpolation=cv2.INTER_CUBIC))
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 while True:
     time_elapsed = time.time() - prev
     if time_elapsed > 1. / frame_rate:
         prev = time.time()
     else:
         continue
-    # Find haar cascade to draw bounding box around face
     ret, frame = cap.read()
     flag = False
     if not ret:
@@ -102,7 +115,7 @@ while True:
             else:
                 break
         happySurpriseLast = happySurpriseLast[index:]
-        if len(happySurpriseLast)  >= n*frame_rate/10:
+        if len(happySurpriseLast)  >= n*frame_rate/2:
             print("Client loses")
             break
     flag = False
