@@ -18,7 +18,7 @@ const io = new Server(server, {
     }
 });
 
-// Optional: If your server serves HTTP routes, configure CORS for Express
+// If your server serves HTTP routes, configure CORS for Express
 app.use(cors({
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
@@ -32,7 +32,11 @@ io.on('connection', (socket) => {
 
     // Handle lobby creation with admin settings
     socket.on('createLobby', (adminSettings) => {
-        const lobbyCode = crypto.randomBytes(3).toString('hex'); // 6-character code
+        let lobbyCode;
+        do {
+            lobbyCode = crypto.randomBytes(3).toString('hex'); // 6-character code
+        } while (lobbies[lobbyCode]); // Ensure uniqueness
+
         lobbies[lobbyCode] = { 
             players: [{ id: socket.id, name: adminSettings.adminName }],
             settings: {
@@ -49,13 +53,35 @@ io.on('connection', (socket) => {
     // Handle players joining a lobby
     socket.on('joinLobby', ({ lobbyCode, playerName }) => {
         if (lobbies[lobbyCode]) {
-            lobbies[lobbyCode].players.push({ id: socket.id, name: playerName });
+            const lobby = lobbies[lobbyCode];
+            if (lobby.players.length >= lobby.settings.maxPlayers) {
+                socket.emit('lobbyFull');
+                console.log(`Lobby ${lobbyCode} is full. Player ${playerName} (${socket.id}) cannot join.`);
+                return;
+            }
+
+            lobby.players.push({ id: socket.id, name: playerName });
             socket.join(lobbyCode);
             io.to(lobbyCode).emit('playerJoined', { id: socket.id, name: playerName });
             console.log(`User ${playerName} (${socket.id}) joined lobby ${lobbyCode}`);
         } else {
             socket.emit('lobbyNotFound');
             console.log(`Lobby not found: ${lobbyCode}`);
+        }
+    });
+
+    // Handle game start
+    socket.on('startGame', ({ lobbyCode }) => {
+        if (lobbies[lobbyCode]) {
+            const lobby = lobbies[lobbyCode];
+            io.to(lobbyCode).emit('gameStarted', {
+                timer: lobby.settings.timer,
+                rounds: lobby.settings.rounds
+            });
+            console.log(`Game started in lobby ${lobbyCode}`);
+        } else {
+            socket.emit('lobbyNotFound');
+            console.log(`Cannot start game. Lobby not found: ${lobbyCode}`);
         }
     });
 
@@ -66,6 +92,8 @@ io.on('connection', (socket) => {
             if (playerIndex !== -1) {
                 const player = lobbies[lobbyCode].players.splice(playerIndex, 1)[0];
                 io.to(lobbyCode).emit('playerLeft', { id: socket.id, name: player.name });
+                console.log(`Player ${player.name} (${socket.id}) left lobby ${lobbyCode}`);
+
                 if (lobbies[lobbyCode].players.length === 0) {
                     delete lobbies[lobbyCode];
                     console.log(`Lobby ${lobbyCode} deleted as it became empty.`);

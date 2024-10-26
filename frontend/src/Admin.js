@@ -1,8 +1,9 @@
 // src/Admin.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // Added useEffect
+import './Admin.css'; // Import the CSS for styling
+import { useNavigate } from 'react-router-dom';
 import socket from './socket';
-import './Admin.css';
 
 const Admin = () => {
     const [timer, setTimer] = useState(10);
@@ -12,6 +13,8 @@ const Admin = () => {
     const [adminName, setAdminName] = useState('Admin'); // You can make this dynamic
 
     const [currentPlayers, setCurrentPlayers] = useState([]);
+
+    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         // Listen for lobby creation
@@ -54,6 +57,7 @@ const Admin = () => {
     const handleStartGame = () => {
         console.log("Starting game with settings:", { timer, rounds, players: currentPlayers.length });
         // Implement game start logic, e.g., navigate to game screen
+        navigate('/game', { state: { timer: parseInt(timer), rounds: parseInt(rounds), players: currentPlayers.map(p => p.name) } });
     };
 
     const handleCopyLink = () => {
@@ -65,6 +69,10 @@ const Admin = () => {
             .catch(err => {
                 console.error('Failed to copy: ', err);
             });
+    };
+
+    const handleGoHome = () => {
+        navigate('/');
     };
 
     return (

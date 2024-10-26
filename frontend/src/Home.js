@@ -23,7 +23,7 @@ const Home = () => {
         // Listen for successful join
         socket.on('playerJoined', (player) => {
             console.log(`Joined lobby as ${player.name}`);
-            navigate(`/game?lobby=${lobbyCode}`);
+            navigate('/game', { state: { timer: 0, rounds: 0, players: [] } }); // Adjust state as needed
         });
 
         // Listen for lobby not found
@@ -36,7 +36,7 @@ const Home = () => {
             socket.off('playerJoined');
             socket.off('lobbyNotFound');
         };
-    }, [location.search, lobbyCode, navigate]);
+    }, [location.search, navigate]);
 
     const handleStart = () => {
         if (playerName && lobbyCode) {
@@ -52,31 +52,30 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <h1 className="game-title">crackle.io</h1>
-            <div className="avatar-selection">
-                <span className="avatar">&#128512;</span>
+            <h1 className="game-title">crackle.io <span className="emoji">😄</span></h1>
+            <div className="name-entry">
+                <label className="name-label">
+                    Name:
+                    <input
+                        type="text"
+                        className="name-input"
+                        placeholder="Enter your name"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                    />
+                </label>
+                <label className="lobby-label">
+                    Lobby Code:
+                    <input
+                        type="text"
+                        className="lobby-input"
+                        placeholder="Enter lobby code"
+                        value={lobbyCode}
+                        onChange={(e) => setLobbyCode(e.target.value)}
+                    />
+                </label>
+                {error && <p className="error-message">{error}</p>}
             </div>
-            <label className="name-label">
-                Name:
-                <input
-                    type="text"
-                    className="name-input"
-                    placeholder="Enter your name"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                />
-            </label>
-            <label className="lobby-label">
-                Lobby Code:
-                <input
-                    type="text"
-                    className="lobby-input"
-                    placeholder="Enter lobby code"
-                    value={lobbyCode}
-                    onChange={(e) => setLobbyCode(e.target.value)}
-                />
-            </label>
-            {error && <p className="error-message">{error}</p>}
             <div className="button-container">
                 <button className="play-button" onClick={handleStart}>
                     Play!

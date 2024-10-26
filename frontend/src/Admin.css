@@ -1,41 +1,104 @@
+/* Admin.css */
+
 .admin-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background-color: #5c4d98; /* Match your theme */
+    background-color: #5c4d98;
     color: white;
     font-family: 'Arial', sans-serif;
 }
 
-.settings {
-    display: flex;
-    flex-direction: column;
+h1 {
     margin-bottom: 20px;
 }
 
-label {
-    margin: 10px 0;
+.admin-content {
+    display: flex;
+    width: 80%;
+    justify-content: space-between;
 }
 
-input {
-    padding: 10px;
+/* Player List with Boxes and Emojis */
+.player-list {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-list h2 {
+    margin-bottom: 10px;
+}
+
+.player-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.player-box {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #6b5fb5;
+    border-radius: 8px;
+    padding: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.player-emoji {
     font-size: 1.2rem;
-    margin-left: 5px;
-    width: 50px; /* Adjust width as needed */
+    margin-right: 6px;
 }
 
-.start-game-button, .invite-button {
-    padding: 10px 20px;
-    font-size: 1.5rem;
-    margin: 10px;
-    cursor: pointer;
-    background-color: #48c774; /* Green for start button */
-    border: none;
+.player-name {
+    font-size: 1rem;
     color: white;
 }
 
+/* Settings and Controls */
+.settings {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    color: white;
+}
+
+input[type="number"], input[type="text"] {
+    padding: 8px;
+    font-size: 1rem;
+    width: 60%;
+    margin-left: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: white;
+    border: none;
+}
+
+.start-game-button {
+    background-color: #48c774;
+}
+
 .invite-button {
-    background-color: #007bff; /* Blue for invite button */
+    background-color: #007bff;
+}
+
+.home-button {
+    background-color: #ff5c5c;
 }
