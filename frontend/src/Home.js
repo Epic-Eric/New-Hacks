@@ -3,17 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import socket from './socket';
+import Loading from './Loading';
 import './Home.css';
 
 const Home = () => {
     const [playerName, setPlayerName] = useState('');
     const [lobbyCode, setLobbyCode] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
-        // Check if there's a lobby code in the URL
         const params = new URLSearchParams(location.search);
         const lobby = params.get('lobby');
         if (lobby) {
@@ -23,24 +24,36 @@ const Home = () => {
         // Listen for successful join
         socket.on('playerJoined', (player) => {
             console.log(`Joined lobby as ${player.name}`);
-            navigate('/game', { state: { timer: 0, rounds: 0, players: [] } }); // Adjust state as needed
+            setIsLoading(true);
         });
 
         // Listen for lobby not found
         socket.on('lobbyNotFound', () => {
             setError('Lobby not found. Please check the code and try again.');
+            setIsLoading(false);
         });
 
-        // Cleanup on unmount
+        // Listen for game start
+        socket.on('gameStarted', (gameSettings) => {
+            console.log("Received 'gameStarted' event:", gameSettings);
+            setIsLoading(false);
+            navigate('/game', { state: { ...gameSettings } });
+        });
+
+        // Cleanup listeners on unmount
         return () => {
             socket.off('playerJoined');
             socket.off('lobbyNotFound');
+            socket.off('gameStarted');
         };
     }, [location.search, navigate]);
 
     const handleStart = () => {
+        setError(''); // Clear any previous error message
         if (playerName && lobbyCode) {
+            console.log("Attempting to join lobby:", lobbyCode);
             socket.emit('joinLobby', { lobbyCode, playerName });
+            setIsLoading(true); // Show loading screen while attempting to join
         } else {
             setError('Please enter both your name and lobby code.');
         }
@@ -49,6 +62,11 @@ const Home = () => {
     const handleCreateGame = () => {
         navigate('/admin');
     };
+
+    // Render loading screen if in loading state
+    if (isLoading) {
+        return <Loading />;
+    }
 
     return (
         <div className="home-container">

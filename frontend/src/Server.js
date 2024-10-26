@@ -109,3 +109,48 @@ const PORT = process.env.PORT || 4001;
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 });
+
+// server.js
+
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+
+    // Handle players joining a lobby
+    socket.on('joinLobby', ({ lobbyCode, playerName }) => {
+        if (lobbies[lobbyCode]) {
+            const lobby = lobbies[lobbyCode];
+            if (lobby.players.length >= lobby.settings.maxPlayers) {
+                socket.emit('lobbyFull');
+                console.log(`Lobby ${lobbyCode} is full. Player ${playerName} (${socket.id}) cannot join.`);
+                return;
+            }
+
+            lobby.players.push({ id: socket.id, name: playerName });
+            socket.join(lobbyCode);
+            io.to(lobbyCode).emit('playerJoined', { id: socket.id, name: playerName });
+            console.log(`User ${playerName} (${socket.id}) joined lobby ${lobbyCode}`);
+        } else {
+            socket.emit('lobbyNotFound');
+            console.log(`Lobby not found: ${lobbyCode}`);
+        }
+    });
+
+    // Handle game start
+    socket.on('startGame', ({ lobbyCode }) => {
+        if (lobbies[lobbyCode]) {
+            const lobby = lobbies[lobbyCode];
+            console.log(`Starting game in lobby ${lobbyCode} with settings:`, lobby.settings);
+            
+            io.to(lobbyCode).emit('gameStarted', {
+                timer: lobby.settings.timer,
+                rounds: lobby.settings.rounds,
+                players: lobby.players // Pass players to the client
+            });
+            console.log(`Game started in lobby ${lobbyCode}`);
+        } else {
+            socket.emit('lobbyNotFound');
+            console.log(`Cannot start game. Lobby not found: ${lobbyCode}`);
+        }
+    });
+});
+

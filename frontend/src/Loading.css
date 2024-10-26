@@ -1,0 +1,28 @@
+/* src/Loading.css */
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #5c4d98;
+    color: white;
+    font-family: 'Arial', sans-serif;
+    font-size: 2rem;
+}
+
+.loading-emoji {
+    font-size: 4rem;
+    animation: spin 1s infinite linear;
+    margin-top: 20px;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
