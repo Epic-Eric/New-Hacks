@@ -12,6 +12,20 @@ socketio = SocketIO(app)
 def index():
     # Serve the HTML file with the client-side webcam code
     return render_template('index.html')
+from flask import Flask, render_template
+from flask_socketio import SocketIO
+import base64
+import cv2
+import numpy as np
+from emotionTest import predict_emotion  # Import your model function
+
+app = Flask(__name__)
+socketio = SocketIO(app)
+
+@app.route('/')
+def index():
+    # Serve the HTML file with the client-side webcam code
+    return render_template('index.html')
 
 @socketio.on('frame')
 def handle_frame(data):
