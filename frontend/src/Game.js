@@ -16,6 +16,9 @@ const Game = () => {
     const [deathLog, setDeathLog] = useState([]);
     const [players, setPlayers] = useState(initialPlayers);
 
+    const [smileDetected, setSmileDetected] = useState(false);
+
+
     useEffect(() => {
         // Listen for players joining
         socket.on('playerJoined', (player) => {
@@ -50,6 +53,63 @@ const Game = () => {
     const handlePlayerDeath = (playerName) => {
         setDeathLog((prevLog) => [...prevLog, `${playerName} has died.`]);
     };
+
+    const captureAndSendFrame = async () => {
+        const videoElement = document.getElementById('webcam');
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+        // Convert the canvas to a Blob (image format) to send to the server
+        canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append('image', blob, 'frame.jpg');
+
+            // Send the image to the Python server for smile detection
+            try {
+                const response = await fetch('http://localhost:5001/detect_smile', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.smile_detected) {
+                    setSmileDetected(true);
+                    socket.emit('smile_detected');  // Emit event if a smile is detected
+                } else {
+                    setSmileDetected(false);
+                }
+            } catch (error) {
+                console.error('Error detecting smile:', error);
+            }
+        }, 'image/jpeg');
+    };
+
+    // Set up webcam capture and send frames at intervals
+    useEffect(() => {
+        // Start the webcam
+        const startWebcam = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoElement = document.getElementById('webcam');
+                videoElement.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+            }
+        };
+
+        startWebcam();
+
+        // Capture frames every second
+        const intervalId = setInterval(captureAndSendFrame, 1000);
+
+        // Cleanup the interval on component unmount
+        return () => clearInterval(intervalId);
+    }, []);
+
+
 
     return (
         <div className="game-container">
