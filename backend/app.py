@@ -24,6 +24,7 @@ socketio = SocketIO(app)
 
 @app.route('/')
 def index():
+
     # Serve the HTML file with the client-side webcam code
     return render_template('index.html')
 

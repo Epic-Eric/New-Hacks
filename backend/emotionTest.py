@@ -9,7 +9,7 @@ from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 import os
 import matplotlib.pyplot as plt
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_CPP_MIN_LOG_LEVEL']: str = '2'
 
 # command line argument
 ap = argparse.ArgumentParser()
@@ -46,11 +46,18 @@ emotion_history = list()
 frame_rate = 5
 prev, start_Time, no_face = time.time(), time.time(), time.time()
 model.load_weights('backend/model.h5')
-def predict_emotion(frame):
+def predict_emotion(frame: np.ndarray) -> list:
+    """
+    Predicts the emotion from a given frame.
+
+    :param: frame: The input frame from the webcam.
+    :type: frame: np.ndarray
+    :return: list: A list of predictions for each detected face in the frame.
+    """
     global no_face
     facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = facecasc.detectMultiScale(gray,scaleFactor=1.3, minNeighbors=5)
+    faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
     preds = []
     if len(faces) == 0:
         if time.time() - no_face > 1:
@@ -65,8 +72,6 @@ def predict_emotion(frame):
         maxindex = int(np.argmax(prediction))
         cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
     return preds
-
-
 # if the model results the client is happy or surprised in the last n seconds for 1/2 of the time, then the client loses
 
 n = 3
