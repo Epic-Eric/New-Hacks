@@ -45,17 +45,17 @@ cv2.ocl.setUseOpenCL(False)
 emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
 emotion_history = list()
 # start the webcam feed
-
 frame_rate = 5
 prev = time.time()
 start_Time = time.time()
 no_face = time.time()
-model.load_weights('model.h5')
+model.load_weights('backend/model.h5')
 def predict_emotion(frame):
-    global emotion_history, no_face
-    facecasc = cv2.CascadeClassifier('../haarcascade_frontalface_default.xml')
+    global no_face
+    facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = facecasc.detectMultiScale(gray,scaleFactor=1.3, minNeighbors=5)
+    preds = []
     if len(faces) == 0:
         if time.time() - no_face > 1:
             print("No face detected")
@@ -65,13 +65,16 @@ def predict_emotion(frame):
         roi_gray = gray[y:y + h, x:x + w]
         cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
         prediction = model.predict(cropped_img)
+        preds.append(prediction[0])
         maxindex = int(np.argmax(prediction))
         cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-        cv2.imshow('Video', cv2.resize(frame,(1600,960),interpolation = cv2.INTER_CUBIC))
-        return prediction[0]
+    return preds
 
 
-""" 
+# if the model results the client is happy or surprised in the last n seconds for 1/2 of the time, then the client loses
+
+n = 3
+happySurpriseLast = list()
 cap = cv2.VideoCapture(0)
 while True:
     time_elapsed = time.time() - prev
@@ -81,23 +84,39 @@ while True:
         continue
     # Find haar cascade to draw bounding box around face
     ret, frame = cap.read()
+    flag = False
     if not ret:
         break
-    predict_emotion(frame)
-    
+    emotions = predict_emotion(frame)
+    for i in emotions:
+        if i[3] + i[6] >= 0.8:
+            flag = True
+            emotion_history.append(time.time() - start_Time)
+    if flag:
+        index = 0
+        happySurpriseLast.append(time.time() - start_Time)
+        for i in range(len(happySurpriseLast)):
+            if time.time() - start_Time -  happySurpriseLast[i] > n:
+                index = i
+                break
+            else:
+                break
+        happySurpriseLast = happySurpriseLast[index:]
+        if len(happySurpriseLast)  >= n*frame_rate/10:
+            print("Client loses")
+            break
+    flag = False
+    cv2.imshow('Video', cv2.resize(frame, (1600, 960), interpolation=cv2.INTER_CUBIC))
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-"""
-"""
+
+
+cap.release()
+cv2.destroyAllWindows()
+
 # with matplot lib, graph time on the x axis spanning from min emotion to max emtion, vertical lines if there is a time where maxindex is 3
 
-    for i in emotion_history:
-        plt.scatter(i, 3)
-    plt.show()
+for i in emotion_history:
+    plt.scatter(i, 3)
+plt.show()
 
-
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-"""
