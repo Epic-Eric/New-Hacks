@@ -36,12 +36,26 @@
     margin-left: 5px;
 }
 
+.button-container {
+    display: flex; /* Use flexbox to align buttons horizontally */
+    gap: 10px; /* Space between the buttons */
+    margin: 20px 0;
+}
+
 .play-button {
     padding: 10px 20px;
     font-size: 1.5rem;
-    margin: 20px 0;
     cursor: pointer;
     background-color: #48c774; /* Green */
+    border: none;
+    color: white;
+}
+
+.create-game-button {
+    padding: 10px 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    background-color: #007bff; /* Blue */
     border: none;
     color: white;
 }

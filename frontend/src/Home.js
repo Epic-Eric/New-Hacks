@@ -1,9 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import './Home.css'; // Ensure to import your styles
 
 const Home = ({ startGame }) => {
     const [playerName, setPlayerName] = React.useState('');
-    const [language, setLanguage] = React.useState('English');
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const handleStart = () => {
         if (playerName) {
@@ -11,11 +12,15 @@ const Home = ({ startGame }) => {
         }
     };
 
+    const handleCreateGame = () => {
+        // Redirect to the /admin page
+        navigate('/admin');
+    };
+
     return (
         <div className="home-container">
             <h1 className="game-title">crackle.io</h1>
             <div className="avatar-selection">
-                {/* Sample avatar (you can replace this with actual avatar selection) */}
                 <span className="avatar">&#128512;</span>
             </div>
             <label className="name-label">
@@ -28,9 +33,14 @@ const Home = ({ startGame }) => {
                     onChange={(e) => setPlayerName(e.target.value)}
                 />
             </label>
-            <button className="play-button" onClick={handleStart}>
-                Play!
-            </button>
+            <div className="button-container">
+                <button className="play-button" onClick={handleStart}>
+                    Play!
+                </button>
+                <button className="create-game-button" onClick={handleCreateGame}>
+                    Create a New Game
+                </button>
+            </div>
             <div className="about-link">
                 <a href="/about">About</a>
             </div>
