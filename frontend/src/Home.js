@@ -98,6 +98,7 @@ const Home = () => {
                             placeholder="Enter your name"
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value)}
+                            aria-label="Player Name"
                         />
                     </div>
                     <div className="form-group">
@@ -109,14 +110,15 @@ const Home = () => {
                             placeholder="Enter lobby code"
                             value={lobbyCode}
                             onChange={(e) => setLobbyCode(e.target.value)}
+                            aria-label="Lobby Code"
                         />
                     </div>
                     {error && <p className="error-message">{error}</p>}
                     <div className="button-group">
-                        <button className="btn btn-primary" onClick={handleStart}>
+                        <button className="btn btn-primary" onClick={handleStart} aria-label="Play">
                             Play!
                         </button>
-                        <button className="btn btn-secondary" onClick={handleCreateGame}>
+                        <button className="btn btn-secondary" onClick={handleCreateGame} aria-label="Create a New Game">
                             Create a New Game
                         </button>
                     </div>
@@ -159,12 +161,11 @@ const Home = () => {
             </main>
 
             <footer className="footer">
-                <div className="about-link">
-                    {/* No content since About is now integrated */}
-                </div>
+                {/* Since About is integrated, this can be left empty or used for other footer content */}
             </footer>
         </div>
     );
+
 };
 
 export default Home;
