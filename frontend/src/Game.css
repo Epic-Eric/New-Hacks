@@ -47,7 +47,6 @@ html, body {
     padding: 20px;
     gap: 20px;
     justify-content: center;
-    align-items: center; /* Center items vertically */
     position: relative; /* Ensure positioning context for children */
 }
 
@@ -99,11 +98,9 @@ html, body {
     background-color: #6b5fb5;
     border-radius: 8px;
     padding: 20px;
-    width: 60%; /* Adjusted width for better centering */
-    max-width: 800px; /* Optional: Set a max-width for larger screens */
+    height: 500px;
     box-sizing: border-box;
     position: relative; /* Ensure positioning context for inner elements */
-    height: auto; /* Let height adjust based on content */
 }
 
 .live-broadcast-title {
@@ -115,19 +112,18 @@ html, body {
 
 .main-video-container {
     width: 100%;
-    height: 0;
-    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: #000;
     border-radius: 8px;
     overflow: hidden;
+    position: relative; /* Ensure positioning context for inner elements */
     z-index: 1; /* Ensure it's below the webcam */
 }
 
 .main-video-player {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -135,18 +131,14 @@ html, body {
 }
 
 .death-log {
-    position: fixed; /* Changed to fixed to stay in top-right */
-    top: 20px;
-    right: 20px;
     width: 20%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
-    background-color: rgba(0, 0, 0, 0.5); /* Optional: Add background for better visibility */
-    padding: 10px;
-    border-radius: 8px;
-    z-index: 1000; /* Ensure it stays above other elements */
+    position: absolute;
+    top: 0;
+    right: 20px;
 }
 
 .death-log h2 {
@@ -194,16 +186,6 @@ html, body {
         bottom: 15px;
         right: 15px;
     }
-    
-    .death-log {
-        width: 25%;
-        top: 15px;
-        right: 15px;
-    }
-    
-    .video-broadcast {
-        width: 80%;
-    }
 }
 
 @media (max-width: 500px) {
@@ -212,16 +194,6 @@ html, body {
         bottom: 10px;
         right: 10px;
     }
-    
-    .death-log {
-        width: 30%;
-        top: 10px;
-        right: 10px;
-    }
-    
-    .video-broadcast {
-        width: 90%;
-    }
 }
 
 /* Optional: Hide scrollbar if any */
@@ -229,7 +201,6 @@ html, body {
     display: none;
 }
 
-/* Remove any default margins and paddings */
 body {
     margin: 0;
     padding: 0;
@@ -239,15 +210,11 @@ body {
     position: relative;
     width: 100%;
     max-width: 800px;
-    height: 0;
-    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 450px;
     margin: 0 auto;
 }
 
 .youtube-iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
@@ -260,6 +227,6 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(255, 255, 255, 0);
-    z-index: 2; /* Ensure it's above the iframe */
+    z-index: 1;
     cursor: default;
 }
