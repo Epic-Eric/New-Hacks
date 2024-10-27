@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import socket from './socket';
 import Loading from './Loading';
-import './Home.css'; // Ensure this path is correct based on your project structure
+import './Home.css'; // Ensure the path is correct based on your project structure
 
 const Home = () => {
     const [playerName, setPlayerName] = useState('');
@@ -76,10 +76,12 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <header className="header">
+            {/* Sidebar */}
+            <aside className="sidebar">
                 <h1 className="game-title">krackle.co <span className="emoji">😄</span></h1>
-            </header>
+            </aside>
 
+            {/* Main Content */}
             <main className="main-content">
                 <section className="form-section">
                     <div className="form-group">
@@ -120,25 +122,25 @@ const Home = () => {
                 <section className="about-section">
                     <h2>Project for NewHacks 2024</h2>
                     <p>
-                        This project was developed for NewHacks 2024, aiming to create an engaging and fun platform for users to compete and enjoy unique challenges.
+                        This project was developed for NewHacks 2024, aiming to create an engaging and fun experience for users to compete and enjoy a unique challenge.
                     </p>
                     <h3>Our Team</h3>
                     <div className="team-members">
                         <div className="member">
                             <h4>Eric</h4>
-                            <p>Lead Developer</p>
+                            <p>Frontend Engineer</p>
                         </div>
                         <div className="member">
                             <h4>Hayson</h4>
-                            <p>UI/UX Designer</p>
-                        </div>
-                        <div className="member">
-                            <h4>Jacky</h4>
                             <p>Backend Engineer</p>
                         </div>
                         <div className="member">
+                            <h4>Jacky</h4>
+                            <p>Frontend Designer</p>
+                        </div>
+                        <div className="member">
                             <h4>Paul</h4>
-                            <p>Project Manager</p>
+                            <p>Backend Engineer</p>
                         </div>
                     </div>
                 </section>
@@ -153,6 +155,7 @@ const Home = () => {
                 </section>
             </main>
 
+            {/* Footer */}
             <footer className="footer">
                 {/* Optional footer content can go here */}
             </footer>
