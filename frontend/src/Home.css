@@ -9,7 +9,7 @@
 
 html, body {
     height: 100%;
-    overflow: hidden; */ /* Removed to allow scrolling */
+    /* overflow: hidden; */ /* Removed to allow scrolling */
     background: #f0f4f8;
     color: #333;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -70,6 +70,7 @@ html, body {
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.18);
+    /* Ensure height is determined by content */
 }
 
 .form-group {
