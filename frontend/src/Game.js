@@ -6,7 +6,13 @@ import { useLocation } from 'react-router-dom';
 import './Game.css';
 
 // Using a publicly hosted sample video for demonstration
-const MAIN_VIDEO_URL = 'https://www.youtube.com/shorts/qjckWVDjxoI';
+const URL = [
+    'https://www.youtube.com/embed/qjckWVDjxoI?autoplay=1',
+    'https://www.youtube.com/embed/GPIP6Q6WOfk?autoplay=1',
+    'https://www.youtube.com/embed/thY3TbclJ2c?autoplay=1',
+    'https://www.youtube.com/embed/p-d87-zmtbc?autoplay=1',
+    'https://www.youtube.com/embed/z22jKvMYHOY?autoplay=1'
+];
 
 const emojis = ['😀', '😆', '😅', '😂', '🤣', '😊', '😍', '😎', '🤩', '🥳', '😜', '🤪'];
 
@@ -21,13 +27,35 @@ const Game = () => {
     const [smileDetected, setSmileDetected] = useState(false);
     const [webcamError, setWebcamError] = useState(null);  // State to track webcam errors
 
+    const [currentVideoUrl, setCurrentVideoUrl] = useState(URL[Math.floor(Math.random() * URL.length)]);
     const videoRef = useRef(null);  // Reference to the webcam video element
+
+    const changeVideo = () => {
+        let newVideoUrl;
+        do {
+            newVideoUrl = URL[Math.floor(Math.random() * URL.length)];
+        } while (newVideoUrl === currentVideoUrl);
+        setCurrentVideoUrl(newVideoUrl);
+    };
+
+    useEffect(() => {
+        // Countdown timer effect
+        if (timer > 0) {
+            const countdown = setInterval(() => setTimer((prev) => Math.max(prev - 1, 0)), 1000);
+            return () => clearInterval(countdown);
+        } else {
+            // When timer hits 0, switch video and reset the timer
+            changeVideo();
+            setTimer(initialTimer);
+            setRound((prevRound) => prevRound > 1 ? prevRound - 1 : prevRound);
+        }
+    }, [timer, initialTimer, round]);
 
     useEffect(() => {
         // Listen for players joining
         socket.on('playerJoined', (player) => {
             setPlayers(prev => [...prev, player]);
-            console.log(`Game display: player joined: ${player.name}`);
+            console.log(`Player joined: ${player.name}`);
         });
 
         // Listen for players leaving
@@ -42,17 +70,6 @@ const Game = () => {
             socket.off('playerLeft');
         };
     }, []);
-
-    // Countdown timer effect
-    useEffect(() => {
-        if (timer > 0) {
-            const countdown = setInterval(() => setTimer((prev) => Math.max(prev - 1, 0)), 1000);
-            return () => clearInterval(countdown);
-        } else if (round > 1) {
-            setTimer(initialTimer);
-            setRound((prevRound) => prevRound - 1);
-        }
-    }, [timer, round, initialTimer]);
 
     const handlePlayerDeath = (playerName) => {
         setDeathLog((prevLog) => [...prevLog, `${playerName} has died.`]);
@@ -195,14 +212,14 @@ const Game = () => {
 
                 <div className="main-video-container">
                     <div className="video-container">
-                    <iframe
-                        className="youtube-iframe"
-                        src={MAIN_VIDEO_URL} // Added autoplay=1 here
-                        title="YouTube video player"
-                        frameBorder="0"
-                        allowFullScreen={false}
-                        allow="autoplay; encrypted-media;"
-                    ></iframe>
+                        <iframe
+                            className="youtube-iframe"
+                            src={currentVideoUrl} // Added autoplay=1 here
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allowFullScreen={false}
+                            allow="autoplay; encrypted-media;"
+                        ></iframe>
                         <div className="overlay"></div>
                     </div>
                 </div>
