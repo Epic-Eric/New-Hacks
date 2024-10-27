@@ -5,12 +5,8 @@ import socket from './socket';
 import { useLocation } from 'react-router-dom';
 import './Game.css';
 
-// Option 1: Using an online video URL or from the public folder
-const MAIN_VIDEO_URL = '/videos/krackle1.mp4'; // Ensure the path is correct
-
-// Option 2: Using a local video file imported from src/assets/videos
-// import krackleVideo from './assets/videos/krackle1.mp4';
-// const MAIN_VIDEO_URL = krackleVideo;
+// Using a publicly hosted sample video for demonstration
+const MAIN_VIDEO_URL = 'https://www.youtube.com/watch?v=qEzmd48TIrA';
 
 const emojis = ['😀', '😆', '😅', '😂', '🤣', '😊', '😍', '😎', '🤩', '🥳', '😜', '🤪'];
 
@@ -177,19 +173,17 @@ const Game = () => {
                     </div>
                 </div>
 
-                <div className="video-broadcast">
-                    <h2 className="live-broadcast-title">Live Broadcast</h2>
-                    {/* Main Video Player */}
-                    <div className="main-video-container">
-                        <video
-                            src={MAIN_VIDEO_URL}
-                            autoPlay
-                            loop
-                            muted
-                            className="main-video-player"
-                        >
-                            Your browser does not support the video tag.
-                        </video>
+                <div className="main-video-container">
+                    <div className="video-container">
+                    <iframe
+                        className="youtube-iframe"
+                        src="https://www.youtube.com/embed/jqdkk7B7KMc?si=S8zUa8TMlUUrwkMN&autoplay=1" // Added autoplay=1 here
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allowFullScreen={false}
+                        allow="autoplay; encrypted-media;"
+                    ></iframe>
+                        <div className="overlay"></div>
                     </div>
                 </div>
 
@@ -213,6 +207,7 @@ const Game = () => {
                 id="webcam" 
                 autoPlay 
                 playsInline 
+                muted  // Muted to comply with autoplay policies if needed
                 className="webcam-video"  // Added className for styling
             ></video>
         </div>
