@@ -20,7 +20,6 @@ const Admin = () => {
         socket.on('createGameResponse', ({ success, gameId, message }) => {
             if (success) {
                 setLobbyCode(gameId);
-                setCurrentPlayers([{ id: 'admin', name: adminName }]);
                 console.log(`Lobby created with code: ${gameId}`);
             } else {
                 setError(message || 'Failed to create game.');
