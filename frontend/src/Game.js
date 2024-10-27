@@ -5,8 +5,13 @@ import socket from './socket';
 import { useLocation } from 'react-router-dom';
 import './Game.css';
 
-// Using a publicly hosted sample video for demonstration
-const MAIN_VIDEO_URL = 'https://www.youtube.com/embed/qjckWVDjxoI?autoplay=1';
+const URL = [
+    'https://www.youtube.com/embed/qjckWVDjxoI?autoplay=1',
+    'https://www.youtube.com/embed/GPIP6Q6WOfk?autoplay=1',
+    'https://www.youtube.com/embed/thY3TbclJ2c?autoplay=1',
+    'https://www.youtube.com/embed/p-d87-zmtbc?autoplay=1',
+    'https://www.youtube.com/embed/z22jKvMYHOY'
+]; 
 
 const emojis = ['😀', '😆', '😅', '😂', '🤣', '😊', '😍', '😎', '🤩', '🥳', '😜', '🤪'];
 
@@ -22,6 +27,9 @@ const Game = () => {
     const [webcamError, setWebcamError] = useState(null);  // State to track webcam errors
 
     const videoRef = useRef(null);  // Reference to the webcam video element
+
+    // Generate a random URL for the video player on each render
+    const randomVideoUrl = URL[Math.floor(Math.random() * URL.length)];
 
     useEffect(() => {
         // Listen for players joining
@@ -175,17 +183,17 @@ const Game = () => {
 
                 <div className="main-video-container">
                     <div className="video-container">
-                    <iframe
-                        className="youtube-iframe"
-                        src="https://www.youtube.com/embed/qjckWVDjxoI?autoplay=1" // Added autoplay=1 here
-                        title="YouTube video player"
-                        frameBorder="0"
-                        allowFullScreen={false}
-                        allow="autoplay; encrypted-media;"
-                    ></iframe>
+                        <iframe
+                            className="youtube-iframe"
+                            src={randomVideoUrl} // Use the randomly selected URL
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allowFullScreen={false}
+                            allow="autoplay; encrypted-media;"
+                        ></iframe>
                         <div className="overlay"></div>
                     </div>
-            </div>
+                </div>
 
                 <div className="death-log">
                     <h2>Death Log</h2>
@@ -212,7 +220,6 @@ const Game = () => {
             ></video>
         </div>
     );
-
 };
 
 export default Game;
