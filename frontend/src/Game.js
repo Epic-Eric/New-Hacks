@@ -114,12 +114,12 @@ const Game = () => {
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                // if(data[3] + data[6] >= 0.8){
-                //     navigate('/lost');
-                // }
-                if(Math.random() < 0.1){
+                if(data[3] + data[6] >= 0.5){
                     navigate('/lost');
                 }
+                // if(Math.random() < 0.1){
+                //     navigate('/lost');
+                // }
             })
             .catch(err => console.error(err));
 
