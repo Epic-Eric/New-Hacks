@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import './Game.css';
 
 // Using a publicly hosted sample video for demonstration
-const MAIN_VIDEO_URL = 'https://www.youtube.com/shorts/qjckWVDjxoI';
+// const MAIN_VIDEO_URL = 'https://www.youtube.com/shorts/qjckWVDjxoI';
 
 const emojis = ['😀', '😆', '😅', '😂', '🤣', '😊', '😍', '😎', '🤩', '🥳', '😜', '🤪'];
 
