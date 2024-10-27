@@ -83,41 +83,86 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <h1 className="game-title">krackle.co <span className="emoji">😄</span></h1>
-            <div className="name-entry">
-                <label className="name-label">
-                    Name:
-                    <input
-                        type="text"
-                        className="name-input"
-                        placeholder="Enter your name"
-                        value={playerName}
-                        onChange={(e) => setPlayerName(e.target.value)}
-                    />
-                </label>
-                <label className="lobby-label">
-                    Lobby Code:
-                    <input
-                        type="text"
-                        className="lobby-input"
-                        placeholder="Enter lobby code"
-                        value={lobbyCode}
-                        onChange={(e) => setLobbyCode(e.target.value)}
-                    />
-                </label>
-                {error && <p className="error-message">{error}</p>}
-            </div>
-            <div className="button-container">
-                <button className="play-button" onClick={handleStart}>
-                    Play!
-                </button>
-                <button className="create-game-button" onClick={handleCreateGame}>
-                    Create a New Game
-                </button>
-            </div>
-            <div className="about-link">
-                <a href="/about">About</a>
-            </div>
+            <header className="header">
+                <h1 className="game-title">krackle.co <span className="emoji">😄</span></h1>
+            </header>
+
+            <main className="main-content">
+                <section className="form-section">
+                    <div className="form-group">
+                        <label htmlFor="playerName" className="form-label">Name:</label>
+                        <input
+                            type="text"
+                            id="playerName"
+                            className="form-input"
+                            placeholder="Enter your name"
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="lobbyCode" className="form-label">Lobby Code:</label>
+                        <input
+                            type="text"
+                            id="lobbyCode"
+                            className="form-input"
+                            placeholder="Enter lobby code"
+                            value={lobbyCode}
+                            onChange={(e) => setLobbyCode(e.target.value)}
+                        />
+                    </div>
+                    {error && <p className="error-message">{error}</p>}
+                    <div className="button-group">
+                        <button className="btn btn-primary" onClick={handleStart}>
+                            Play!
+                        </button>
+                        <button className="btn btn-secondary" onClick={handleCreateGame}>
+                            Create a New Game
+                        </button>
+                    </div>
+                </section>
+
+                <section className="about-section">
+                    <h2>About krackle.co</h2>
+                    <p>
+                        Welcome to krackle.co, your ultimate destination for fun and competitive challenges! In 2024, we've introduced exciting new hacks to elevate your gaming experience. Whether you're here to compete with friends or showcase your skills, krackle.co offers a dynamic environment tailored just for you.
+                    </p>
+                    <h3>Our Team</h3>
+                    <div className="team-members">
+                        <div className="member">
+                            <h4>Eric</h4>
+                            <p>Lead Developer</p>
+                        </div>
+                        <div className="member">
+                            <h4>Hayson</h4>
+                            <p>UI/UX Designer</p>
+                        </div>
+                        <div className="member">
+                            <h4>Jacky</h4>
+                            <p>Backend Engineer</p>
+                        </div>
+                        <div className="member">
+                            <h4>Paul</h4>
+                            <p>Project Manager</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="rules-section">
+                    <h2>Rules</h2>
+                    <ol className="rules-list">
+                        <li>Watch a Funny Reel.</li>
+                        <li>Try not to Laugh.</li>
+                        <li>Earn Points and Compete with your friends.</li>
+                    </ol>
+                </section>
+            </main>
+
+            <footer className="footer">
+                <div className="about-link">
+                    {/* Removed the external About link since About is now integrated */}
+                </div>
+            </footer>
         </div>
     );
 };
