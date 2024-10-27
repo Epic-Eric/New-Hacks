@@ -9,7 +9,7 @@
 
 html, body {
     height: 100%;
-    /* overflow: hidden; */ /* Removed to allow scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
     background: #f0f4f8;
     color: #333;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,7 +18,7 @@ html, body {
 .home-container {
     display: flex;
     flex-direction: row;
-    min-height: 100vh; /* Changed from height to min-height */
+    min-height: 100vh; /* Allows the container to grow with content */
     background: linear-gradient(135deg, #5c4d98, #a179c9);
     color: white;
 }
@@ -55,7 +55,7 @@ html, body {
 .main-content {
     width: 75%; /* Adjust as needed */
     padding: 20px;
-    overflow-y: auto; /* Enable scrolling within main content if needed */
+    overflow-y: auto; /* Enable scrolling within main content */
     display: flex;
     flex-direction: column;
     gap: 30px;
