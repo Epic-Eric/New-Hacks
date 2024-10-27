@@ -9,7 +9,7 @@
 
 html, body {
     height: 100%;
-    overflow: hidden; /* Prevent body from scrolling */
+    /* overflow: hidden; */ /* Removed to allow scrolling */
     background: #f0f4f8;
     color: #333;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,7 +18,7 @@ html, body {
 .home-container {
     display: flex;
     flex-direction: row;
-    height: 100vh; /* Full viewport height */
+    min-height: 100vh; /* Changed from height to min-height */
     background: linear-gradient(135deg, #5c4d98, #a179c9);
     color: white;
 }
@@ -34,6 +34,7 @@ html, body {
     align-items: center;
     justify-content: center;
     border-radius: 0 10px 10px 0;
+    flex-shrink: 0; /* Prevents the sidebar from shrinking */
 }
 
 .game-title {
@@ -59,6 +60,7 @@ html, body {
     flex-direction: column;
     gap: 30px;
     color: #f0f4f8;
+    flex-grow: 1; /* Allows main-content to grow */
 }
 
 .form-section, .about-section, .rules-section {
