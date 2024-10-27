@@ -44,44 +44,6 @@ const io = new Server(server, {
 
 
 
-//new
-// Configure multer for image upload handling
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-
-        if (!fs.existsSync(uploadDirectory)) {
-            fs.mkdirSync(uploadDirectory);
-        }
-        cb(null, './uploads');  // Path to save the images
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));  // Save with unique name
-    }
-});
-
-const upload = multer({ storage: storage });
-
-// Handle image upload route
-app.post('/upload_image', upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: 'No image uploaded.' });
-    }
-
-
-    console.log('Image received:', req.file);  // Log the image information
-    res.json({ success: true, message: 'Image received successfully!', file: req.file });
-});
-//new
-
-
-
-
-
-
-
-
-
 
 // Serve static files or set up routes as needed
 app.get('/', (req, res) => {
