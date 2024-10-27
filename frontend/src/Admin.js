@@ -1,24 +1,22 @@
 // src/Admin.js
 
 import React, { useState, useEffect } from 'react';
-import './Admin.css'; // Import the CSS for styling
+import './Admin.css';
 import { useNavigate } from 'react-router-dom';
 import socket from './socket';
 
 const Admin = () => {
     const [timer, setTimer] = useState(10);
     const [rounds, setRounds] = useState(3);
-    const [players, setPlayers] = useState(2); // Max players
+    const [players, setPlayers] = useState(2);
     const [lobbyCode, setLobbyCode] = useState('');
-    const [adminName, setAdminName] = useState('Admin'); // You can make this dynamic
-
+    const [adminName, setAdminName] = useState('Admin');
     const [currentPlayers, setCurrentPlayers] = useState([]);
     const [error, setError] = useState('');
 
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
 
     useEffect(() => {
-        // Listen for createGameResponse
         socket.on('createGameResponse', ({ success, gameId, message }) => {
             if (success) {
                 setLobbyCode(gameId);
@@ -30,25 +28,22 @@ const Admin = () => {
             }
         });
 
-        // Listen for players joining
         socket.on('playerJoined', (player) => {
             setCurrentPlayers(prevPlayers => {
-                // Only add the player if they don't already exist in the list
+                // Check if the player already exists to prevent duplicates
                 if (!prevPlayers.some(p => p.id === player.id)) {
                     return [...prevPlayers, player];
                 }
                 return prevPlayers;
             });
-            console.log(`Admin display: Player joined: ${player.name}`);
+            console.log(`Player joined: ${player.name}`);
         });
 
-        // Listen for players leaving
         socket.on('playerLeft', (player) => {
             setCurrentPlayers(prev => prev.filter(p => p.id !== player.id));
             console.log(`Player left: ${player.name}`);
         });
 
-        // Cleanup on unmount
         return () => {
             socket.off('createGameResponse');
             socket.off('playerJoined');
@@ -57,7 +52,7 @@ const Admin = () => {
     }, [adminName]);
 
     const handleCreateGame = () => {
-        setError(''); // Clear any previous error message
+        setError('');
         if (adminName && timer > 0 && rounds > 0 && players > 0) {
             const adminSettings = {
                 adminName,
@@ -67,13 +62,8 @@ const Admin = () => {
             };
             socket.emit('createGame', adminSettings);
 
-            // Add the admin only if not already in the list
-            setCurrentPlayers(prevPlayers => {
-                if (!prevPlayers.some(p => p.id === 'admin')) {
-                    return [{ id: 'admin', name: adminName }];
-                }
-                return prevPlayers;
-            });
+            // Ensure the admin is only added once
+            setCurrentPlayers([{ id: 'admin', name: adminName }]);
         } else {
             setError('Please provide valid game settings.');
         }
@@ -81,9 +71,7 @@ const Admin = () => {
 
     const handleStartGame = () => {
         console.log("Starting game with settings:", { timer, rounds, players: currentPlayers.length });
-        // Emit 'startGame' event to backend
         socket.emit('startGame', lobbyCode);
-        // Navigate to game screen
         navigate('/game', { state: { timer: parseInt(timer), rounds: parseInt(rounds), players: currentPlayers.map(p => p.name) } });
     };
 
@@ -165,7 +153,7 @@ const Admin = () => {
                     <button
                         className="start-game-button"
                         onClick={handleStartGame}
-                        disabled={currentPlayers.length < 2} // Example condition
+                        disabled={currentPlayers.length < 2}
                     >
                         Start Game
                     </button>
