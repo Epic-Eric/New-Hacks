@@ -77,7 +77,7 @@ const Game = () => {
 
                 // Send the image to the js server for smile detection
                 try {
-                    const response = await fetch('/upload_image', {
+                    const response = await fetch('https://www.krackle.co/upload_image', {
                         method: 'POST',
                         body: formData
                     });

@@ -6,9 +6,11 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const crypto = require('crypto');
 
-// new
-// const multer = require('multer');
-// const path = require('path');
+
+//new
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 
 const app = express();
@@ -32,6 +34,49 @@ const io = new Server(server, {
         credentials: true
     }
 });
+
+
+
+
+
+//new 
+
+const uploadDir = path.join(__dirname, '../frontend/public/uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);  // Save files to 'public/uploads'
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);  // Timestamp to avoid name collisions
+    }
+});
+
+const upload = multer({ storage });
+
+// Route for uploading images
+app.post('/upload_image', upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+    
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ message: 'Image uploaded successfully', fileUrl });
+});
+
+// Serve static files from the 'public' folder
+app.use(express.static(path.join(__dirname, '../frontend/public/uploads')));
+
+
+//new ends
+
+
+
+
+
 
 // Serve static files or set up routes as needed
 app.get('/', (req, res) => {
