@@ -48,6 +48,10 @@ const io = new Server(server, {
 // Configure multer for image upload handling
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
+
+        if (!fs.existsSync(uploadDirectory)) {
+            fs.mkdirSync(uploadDirectory);
+        }
         cb(null, './uploads');  // Path to save the images
     },
     filename: (req, file, cb) => {
@@ -60,6 +64,11 @@ const upload = multer({ storage: storage });
 
 // Handle image upload route
 app.post('/upload_image', upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No image uploaded.' });
+    }
+
+
     console.log('Image received:', req.file);  // Log the image information
     res.json({ success: true, message: 'Image received successfully!', file: req.file });
 });
