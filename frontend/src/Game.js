@@ -1,6 +1,4 @@
-// src/Game.js
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import socket from './socket';
 import { useLocation } from 'react-router-dom';
 import './Game.css';
@@ -15,9 +13,10 @@ const Game = () => {
     const [round, setRound] = useState(initialRounds);
     const [deathLog, setDeathLog] = useState([]);
     const [players, setPlayers] = useState(initialPlayers);
-
     const [smileDetected, setSmileDetected] = useState(false);
+    const [webcamError, setWebcamError] = useState(null);  // State to track webcam errors
 
+    const videoRef = useRef(null);  // Use useRef to reference the video element
 
     useEffect(() => {
         // Listen for players joining
@@ -54,37 +53,44 @@ const Game = () => {
         setDeathLog((prevLog) => [...prevLog, `${playerName} has died.`]);
     };
 
+    // Capture webcam frame and send it to Python server
     const captureAndSendFrame = async () => {
-        const videoElement = document.getElementById('webcam');
-        const canvas = document.createElement('canvas');
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+        const videoElement = videoRef.current;  // Get the video element reference from useRef
+        
+        // Ensure the video element is ready before capturing the frame
+        if (videoElement && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-        // Convert the canvas to a Blob (image format) to send to the server
-        canvas.toBlob(async (blob) => {
-            const formData = new FormData();
-            formData.append('image', blob, 'frame.jpg');
+            // Convert the canvas to a Blob (image format) to send to the server
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('image', blob, 'frame.jpg');
 
-            // Send the image to the Python server for smile detection
-            try {
-                const response = await fetch('http://localhost:5001/detect_smile', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
+                // Send the image to the Python server for smile detection
+                try {
+                    const response = await fetch('http://localhost:5001/detect_smile', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
 
-                if (result.smile_detected) {
-                    setSmileDetected(true);
-                    socket.emit('smile_detected');  // Emit event if a smile is detected
-                } else {
-                    setSmileDetected(false);
+                    if (result.smile_detected) {
+                        setSmileDetected(true);
+                        socket.emit('smile_detected');  // Emit event if a smile is detected
+                    } else {
+                        setSmileDetected(false);
+                    }
+                } catch (error) {
+                    console.error('Error detecting smile:', error);
                 }
-            } catch (error) {
-                console.error('Error detecting smile:', error);
-            }
-        }, 'image/jpeg');
+            }, 'image/jpeg');
+        } else {
+            console.log("Video element not ready yet.");
+        }
     };
 
     // Set up webcam capture and send frames at intervals
@@ -92,11 +98,33 @@ const Game = () => {
         // Start the webcam
         const startWebcam = async () => {
             try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Webcam access is not supported by this browser.');
+                }
+
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const videoElement = document.getElementById('webcam');
-                videoElement.srcObject = stream;
+                
+                // Debug the stream object
+                console.log('Stream object:', stream);
+                
+                const videoElement = videoRef.current;  // Get the video element reference from useRef
+                
+                if (videoElement) {
+                    // Debug the video element before assignment
+                    console.log('Video element:', videoElement);
+                    
+                    videoElement.srcObject = stream;
+
+                    // Ensure the video is ready before capturing frames
+                    videoElement.addEventListener('loadedmetadata', () => {
+                        console.log("Webcam stream is ready.");
+                    });
+                } else {
+                    throw new Error('Video element is not available.');
+                }
             } catch (error) {
                 console.error('Error accessing webcam:', error);
+                setWebcamError(error.message);  // Capture and display the webcam error
             }
         };
 
@@ -109,8 +137,6 @@ const Game = () => {
         return () => clearInterval(intervalId);
     }, []);
 
-
-
     return (
         <div className="game-container">
             <div className="top-bar">
@@ -118,6 +144,8 @@ const Game = () => {
                 <div className="game-info">
                     <p>Timer: {timer}s</p>
                     <p>Round: {round}</p>
+                    <p>{smileDetected ? 'Smile detected!' : 'No smile detected.'}</p>
+                    {webcamError && <p className="error-message">{webcamError}</p>}  {/* Display webcam error if any */}
                 </div>
             </div>
 
@@ -136,7 +164,8 @@ const Game = () => {
 
                 <div className="video-broadcast">
                     <h2 className="live-broadcast-title">Live Broadcast</h2>
-                    <div className="video-placeholder">[ Video Feed ]</div>
+                    {/* Webcam Video Element */}
+                    <video ref={videoRef} id="webcam" autoPlay playsInline></video>
                 </div>
 
                 <div className="death-log">
