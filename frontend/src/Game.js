@@ -28,6 +28,7 @@ const Game = () => {
     const [currentVideoUrl, setCurrentVideoUrl] = useState(URL[Math.floor(Math.random() * URL.length)]);
 
     const videoRef = useRef(null);
+    const frameCounter = useRef(0); // Initialize frame counter
 
     // Function to pick a new random video URL that’s different from the current one
     const changeVideo = () => {
@@ -77,6 +78,13 @@ const Game = () => {
 
     // Capture webcam frame and send it to Python server
     const captureAndSendFrame = async () => {
+        frameCounter.current += 1; // Increment frame counter
+
+        // Capture every 5th frame
+        if (frameCounter.current % 5 !== 0) {
+            return; // Skip this frame
+        }
+
         const videoElement = videoRef.current;
 
         if (videoElement && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
@@ -88,23 +96,22 @@ const Game = () => {
 
             canvas.toBlob(async (blob) => {
                 const formData = new FormData();
-                formData.append('image', blob, 'frame.jpg');
+                formData.append('image', blob, `frame_${Date.now()}.jpg`); // Unique filename
 
                 try {
-                    const response = await fetch('http://localhost:5001/detect_smile', {
+                    const response = await fetch('http://localhost:5001/save_image', { // Updated endpoint
                         method: 'POST',
                         body: formData
                     });
                     const result = await response.json();
 
-                    if (result.smile_detected) {
-                        setSmileDetected(true);
-                        socket.emit('smile_detected');
+                    if (result.success) {
+                        console.log('Image saved successfully:', result.filePath);
                     } else {
-                        setSmileDetected(false);
+                        console.error('Failed to save image:', result.message);
                     }
                 } catch (error) {
-                    console.error('Error detecting smile:', error);
+                    console.error('Error saving image:', error);
                 }
             }, 'image/jpeg');
         } else {
@@ -127,6 +134,7 @@ const Game = () => {
                     videoElement.srcObject = stream;
                     videoElement.addEventListener('loadedmetadata', () => {
                         console.log("Webcam stream is ready.");
+                        videoElement.play();
                     });
                 } else {
                     throw new Error('Video element is not available.');
@@ -139,7 +147,8 @@ const Game = () => {
 
         startWebcam();
 
-        const intervalId = setInterval(captureAndSendFrame, 1000);
+        // Capture frames every 200ms (~5 frames per second)
+        const intervalId = setInterval(captureAndSendFrame, 200);
 
         return () => {
             clearInterval(intervalId);
