@@ -6,6 +6,7 @@ import io from 'socket.io-client';
 import Home from './Home';
 import Admin from './Admin';
 import Game from './Game'; // Import the Game component
+import Lost from './Lost';
 import './App.css';
 
 const socket = io('https://www.krackle.co'); // Connect to the WebSocket server
@@ -43,6 +44,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/game" element={<Game />} /> {/* Route for Game */}
+                <Route path="/lost" element={<Lost />} />
                 {/* Add more routes as needed */}
             </Routes>
         </Router>

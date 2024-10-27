@@ -112,9 +112,10 @@ const Game = () => {
             })
             .then(response => response.json())
             .then(data => console.log(data))
-            .then(data => console.log('succesful'))
             .catch(err => console.error(err));
-
+            if(data[3] + data[6] >= 0.8){
+                navigate('/lost');
+            }
 
 
         } else {
