@@ -10,6 +10,9 @@
 html, body {
     height: 100%;
     overflow: hidden; /* Prevent body from scrolling */
+    background: #f0f4f8;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .home-container {
@@ -18,32 +21,32 @@ html, body {
     height: 100vh; /* Full viewport height */
     background: linear-gradient(135deg, #5c4d98, #a179c9);
     color: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    box-sizing: border-box;
 }
 
 /* Sidebar Styles */
 .sidebar {
     width: 25%; /* Adjust as needed */
     min-width: 200px;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(30, 30, 60, 0.7);
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    border-radius: 0 10px 10px 0;
 }
 
 .game-title {
-    font-size: 3rem; /* Adjusted for sidebar */
+    font-size: 2.8rem; /* Adjusted for sidebar */
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #e6e6fa;
 }
 
 .emoji {
-    font-size: 2.5rem; /* Adjusted emoji size */
+    font-size: 2.3rem; /* Adjusted emoji size */
     margin-left: 10px;
 }
 
@@ -55,15 +58,15 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    color: #f0f4f8;
 }
 
 .form-section, .about-section, .rules-section {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.2);
     padding: 20px 30px;
     border-radius: 10px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
@@ -74,8 +77,9 @@ html, body {
 }
 
 .form-label {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     margin-bottom: 5px;
+    color: #e0e0e0;
 }
 
 .form-input {
@@ -84,18 +88,17 @@ html, body {
     border: none;
     border-radius: 5px;
     outline: none;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    background: rgba(255, 255, 255, 0.3);
+    color: #333;
     transition: background 0.3s ease;
 }
 
 .form-input::placeholder {
-    color: #e0e0e0;
-    text-align: center;
+    color: #d9d9d9;
 }
 
 .form-input:focus {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .button-group {
@@ -111,7 +114,8 @@ html, body {
     border-radius: 5px;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    color: white;
+    color: #f0f4f8;
+    font-weight: bold;
 }
 
 .btn-primary {
@@ -156,11 +160,13 @@ html, body {
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     text-align: center;
+    color: #f0f4f8;
 }
 
 .member h4 {
     margin-bottom: 5px;
     font-size: 1.2rem;
+    color: #e6e6fa;
 }
 
 .member p {
@@ -174,6 +180,7 @@ html, body {
     padding-left: 0;
     font-size: 1.1rem;
     line-height: 1.6;
+    color: #e0e0e0;
 }
 
 .rules-list li {
@@ -183,8 +190,9 @@ html, body {
 .footer {
     text-align: center;
     padding: 10px;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(20, 20, 50, 0.5);
     border-radius: 5px;
+    color: #f0f4f8;
 }
 
 /* Responsive Design */
