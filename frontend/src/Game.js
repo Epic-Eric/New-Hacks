@@ -64,11 +64,11 @@ const Game = () => {
 
         // Ensure the video element is ready before capturing the frame
         if (videoElement && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
-            // const canvas = document.createElement('canvas');
-            // canvas.width = videoElement.videoWidth;
-            // canvas.height = videoElement.videoHeight;
-            // const ctx = canvas.getContext('2d');
-            // ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
             // // Convert the canvas to a Blob (image format) to send to the server
             // canvas.toBlob(async (blob) => {
@@ -94,7 +94,7 @@ const Game = () => {
             //     }
             // }, 'image/jpeg');
 
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             // Convert the canvas image to base64 string
             const imageData = canvas.toDataURL('image/jpeg').split(',')[1]; // Only get the base64 part
