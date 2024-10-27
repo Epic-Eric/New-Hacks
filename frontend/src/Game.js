@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import socket from './socket';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import './Game.css';
 
 // Using a publicly hosted sample video for demonstration
@@ -22,6 +22,7 @@ const Game = () => {
     const [webcamError, setWebcamError] = useState(null);  // State to track webcam errors
     const [searchParams] = useSearchParams();
     const name = searchParams.get('name');
+    const navigate = useNavigate();
 
     const videoRef = useRef(null);  // Reference to the webcam video element
 
@@ -111,11 +112,13 @@ const Game = () => {
                 body: JSON.stringify({ image: imageData, name: name })
             })
             .then(response => response.json())
-            .then(data => console.log(data))
+            .then(data => {
+                console.log(data);
+                if(data[3] + data[6] >= 0.8){
+                    navigate('/lost');
+                }
+            })
             .catch(err => console.error(err));
-            if(data[3] + data[6] >= 0.8){
-                navigate('/lost');
-            }
 
 
         } else {
