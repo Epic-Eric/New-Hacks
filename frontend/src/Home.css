@@ -1,9 +1,21 @@
 /* src/Home.css */
 
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: auto; /* Ensure the body allows scrolling */
+}
+
 .home-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 100vh; /* Ensure the container takes full viewport height */
     background: linear-gradient(135deg, #5c4d98, #a179c9);
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -36,7 +48,7 @@
     gap: 40px;
     max-width: 800px;
     margin: 0 auto;
-    /* Removed flex: 1 to allow content to determine height */
+    flex: 1; /* Allow main content to grow and fill available space */
 }
 
 .form-section {
@@ -184,10 +196,9 @@
 .footer {
     text-align: center;
     margin-top: 30px;
-}
-
-.about-link {
-    /* No content since About is now integrated */
+    padding: 10px;
+    background-color: #483d8b;
+    border-radius: 5px;
 }
 
 /* Responsive Design */
@@ -232,32 +243,4 @@
     .about-section p, .member h4, .member p, .rules-list {
         font-size: 1rem;
     }
-}
-
-.home-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #5c4d98;
-    color: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-y: auto; /* Enable vertical scrolling */
-}
-
-.main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow-y: auto; /* Allow main content to scroll */
-}
-
-/* Ensure the footer doesn’t push content off the screen */
-.footer {
-    margin-top: auto;
-    text-align: center;
-    padding: 10px;
-    background-color: #483d8b;
 }

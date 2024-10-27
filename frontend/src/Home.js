@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import socket from './socket';
 import Loading from './Loading';
-import './Home.css';
+import './Home.css'; // Ensure this path is correct based on your project structure
 
 const Home = () => {
     const [playerName, setPlayerName] = useState('');
@@ -21,39 +21,33 @@ const Home = () => {
             setLobbyCode(lobby);
         }
 
-        // Listen for successful join
+        // Socket event listeners
         socket.on('playerJoined', (player) => {
             console.log(`Joined lobby as ${player.name}`);
-            // No need to setIsLoading(true) here since it's already set when attempting to join
         });
 
-        // Listen for lobby not found
         socket.on('lobbyNotFound', () => {
             setError('Lobby not found. Please check the code and try again.');
             setIsLoading(false);
         });
 
-        // Listen for joinLobbyResponse
         socket.on('joinLobbyResponse', ({ success, lobbyCode, message }) => {
             if (success) {
                 console.log(`Successfully joined lobby: ${lobbyCode}`);
-                // Optionally, you can update UI or navigate
             } else {
                 setError(message || 'Failed to join lobby.');
                 setIsLoading(false);
             }
         });
 
-        // Listen for game start
         socket.on('gameStarted', (gameSettings) => {
             console.log("Received 'gameStarted' event:", gameSettings);
             setIsLoading(false);
             navigate('/game', { state: { ...gameSettings } });
         });
 
-        // Cleanup listeners on unmount
+        // Cleanup listeners
         return () => {
-            console.log("Cleaning up 'playerJoined', 'lobbyNotFound', 'joinLobbyResponse', and 'gameStarted' listeners");
             socket.off('playerJoined');
             socket.off('lobbyNotFound');
             socket.off('joinLobbyResponse');
@@ -62,21 +56,20 @@ const Home = () => {
     }, [location.search, navigate]);
 
     const handleStart = () => {
-        setError(''); // Clear any previous error message
+        setError('');
         if (playerName && lobbyCode) {
             console.log("Attempting to join lobby:", lobbyCode);
             socket.emit('joinLobby', { lobbyCode, playerName });
-            setIsLoading(true); // Show loading screen while attempting to join
+            setIsLoading(true);
         } else {
             setError('Please enter both your name and lobby code.');
         }
     };
 
     const handleCreateGame = () => {
-        navigate('/admin'); // Navigate to admin screen for game creation
+        navigate('/admin');
     };
 
-    // Render loading screen if in loading state
     if (isLoading) {
         return <Loading />;
     }
@@ -125,9 +118,9 @@ const Home = () => {
                 </section>
 
                 <section className="about-section">
-                    <h2>About krackle.co</h2>
+                    <h2>Project for NewHacks 2024</h2>
                     <p>
-                        Welcome to krackle.co, your ultimate destination for fun and competitive challenges! In 2024, we've introduced exciting new hacks to elevate your gaming experience. Whether you're here to compete with friends or showcase your skills, krackle.co offers a dynamic environment tailored just for you.
+                        This project was developed for NewHacks 2024, aiming to create an engaging and fun platform for users to compete and enjoy unique challenges.
                     </p>
                     <h3>Our Team</h3>
                     <div className="team-members">
@@ -161,7 +154,7 @@ const Home = () => {
             </main>
 
             <footer className="footer">
-                {/* Since About is integrated, this can be left empty or used for other footer content */}
+                {/* Optional footer content can go here */}
             </footer>
         </div>
     );
