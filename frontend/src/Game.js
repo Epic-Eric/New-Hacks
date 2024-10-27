@@ -92,6 +92,7 @@ const Game = () => {
     // Capture webcam frame and send it to Python server
     const captureAndSendFrame = async () => {
         const videoElement = videoRef.current;
+        console.log(videoElement);
 
         if (videoElement && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
             const canvas = document.createElement('canvas');

@@ -42,9 +42,6 @@ const io = new Server(server, {
     }
 });
 
-
-
-
 // Serve static files or set up routes as needed
 app.get('/', (req, res) => {
     res.send('Socket.IO Backend is running.');
