@@ -122,7 +122,7 @@ const Home = () => {
                 <section className="about-section">
                     <h2>Project for NewHacks 2024</h2>
                     <p>
-                        This project was developed for NewHacks 2024, aiming to create an engaging and fun platform for users to compete and enjoy unique challenges.
+                        This project was developed for NewHacks 2024, aiming to create an engaging and fun experience for users to compete and enjoy a unique challenge.
                     </p>
                     <h3>Our Team</h3>
                     <div className="team-members">
