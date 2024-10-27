@@ -1,6 +1,6 @@
 /* src/Home.css */
 
-/* Reset some default styles */
+/* Reset default styles */
 * {
     margin: 0;
     padding: 0;
@@ -8,8 +8,8 @@
 }
 
 html, body {
-    height: 100%;
-    overflow-y: auto; /* Enable vertical scrolling */
+    min-height: 100vh; /* Allow the page to grow with content */
+    overflow-y: auto; /* Enable vertical scrolling on the entire page */
     background: #f0f4f8;
     color: #333;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,14 +18,15 @@ html, body {
 .home-container {
     display: flex;
     flex-direction: row;
-    min-height: 100vh; /* Allows the container to grow with content */
+    width: 100%;
+    min-height: 100vh; /* Ensures container covers full viewport height */
     background: linear-gradient(135deg, #5c4d98, #a179c9);
     color: white;
 }
 
 /* Sidebar Styles */
 .sidebar {
-    width: 25%; /* Adjust as needed */
+    width: 25%;
     min-width: 200px;
     background-color: rgba(30, 30, 60, 0.7);
     padding: 20px;
@@ -34,11 +35,11 @@ html, body {
     align-items: center;
     justify-content: center;
     border-radius: 0 10px 10px 0;
-    flex-shrink: 0; /* Prevents the sidebar from shrinking */
+    flex-shrink: 0;
 }
 
 .game-title {
-    font-size: 2.8rem; /* Adjusted for sidebar */
+    font-size: 2.8rem;
     text-align: center;
     display: flex;
     align-items: center;
@@ -47,20 +48,19 @@ html, body {
 }
 
 .emoji {
-    font-size: 2.3rem; /* Adjusted emoji size */
+    font-size: 2.3rem;
     margin-left: 10px;
 }
 
 /* Main Content Styles */
 .main-content {
-    width: 75%; /* Adjust as needed */
+    width: 75%;
     padding: 20px;
-    overflow-y: auto; /* Enable scrolling within main content */
+    overflow-y: auto; /* Ensure independent scrolling */
     display: flex;
     flex-direction: column;
     gap: 30px;
     color: #f0f4f8;
-    flex-grow: 1; /* Allows main-content to grow */
 }
 
 .form-section, .about-section, .rules-section {
@@ -70,7 +70,6 @@ html, body {
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    /* Ensure height is determined by content */
 }
 
 .form-group {
@@ -93,7 +92,6 @@ html, body {
     outline: none;
     background: rgba(255, 255, 255, 0.3);
     color: #333;
-    transition: background 0.3s ease;
 }
 
 .form-input::placeholder {
@@ -116,7 +114,6 @@ html, body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
     color: #f0f4f8;
     font-weight: bold;
 }
@@ -125,20 +122,8 @@ html, body {
     background-color: #28a745;
 }
 
-.btn-primary:hover {
-    background-color: #218838;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
 .btn-secondary {
     background-color: #007bff;
-}
-
-.btn-secondary:hover {
-    background-color: #0069d9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .error-message {
