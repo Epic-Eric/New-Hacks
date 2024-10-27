@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import socket from './socket';
 import Loading from './Loading';
-import './Home.css'; // Ensure this path is correct based on your project structure
+import './Home.css'; // Ensure the path is correct based on your project structure
 
 const Home = () => {
     const [playerName, setPlayerName] = useState('');
@@ -76,10 +76,12 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <header className="header">
+            {/* Sidebar */}
+            <aside className="sidebar">
                 <h1 className="game-title">krackle.co <span className="emoji">😄</span></h1>
-            </header>
+            </aside>
 
+            {/* Main Content */}
             <main className="main-content">
                 <section className="form-section">
                     <div className="form-group">
@@ -153,6 +155,7 @@ const Home = () => {
                 </section>
             </main>
 
+            {/* Footer */}
             <footer className="footer">
                 {/* Optional footer content can go here */}
             </footer>
