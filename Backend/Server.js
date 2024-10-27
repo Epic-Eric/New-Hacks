@@ -59,10 +59,13 @@ io.on('connection', (socket) => {
             players: []
         };
 
+        // **Join the admin to the lobby room**
+        socket.join(gameId);
+
         // Emit 'createGameResponse' back to the admin client
         socket.emit('createGameResponse', { success: true, gameId });
 
-        // Optionally, emit 'lobbyCreated' to inform about the new lobby
+        // Optional: Notify all clients about the new lobby
         // io.emit('lobbyCreated', { lobbyCode: gameId, players: lobbies[gameId].players });
     });
 
@@ -77,7 +80,7 @@ io.on('connection', (socket) => {
                 lobby.players.push(player);
                 socket.join(lobbyCode);
 
-                // Emit 'playerJoined' to the lobby
+                // Emit 'playerJoined' to the lobby room
                 io.to(lobbyCode).emit('playerJoined', player);
 
                 // Emit successful join to the player
