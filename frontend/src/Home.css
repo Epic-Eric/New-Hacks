@@ -1,4 +1,4 @@
-/* Combined CSS */
+/* src/Home.css */
 
 /* Reset some default styles */
 * {
@@ -250,3 +250,27 @@ html, body {
 
     .emoji {
         font-size: 1.5rem;
+    }
+
+    .form-section, .about-section, .rules-section {
+        padding: 15px 20px;
+    }
+
+    .form-input {
+        font-size: 0.9rem;
+        padding: 8px 10px;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    .about-section h2, .rules-section h2 {
+        font-size: 1.2rem;
+    }
+
+    .about-section p, .member h4, .member p, .rules-list {
+        font-size: 0.9rem;
+    }
+}
