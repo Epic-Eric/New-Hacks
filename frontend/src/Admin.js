@@ -33,7 +33,20 @@ const Admin = () => {
 
         // Listen for players joining
         socket.on('playerJoined', (player) => {
-            setCurrentPlayers(prev => [...prev, player]);
+            // Prevent adding admin again if already present
+            if (player.id === 'admin') {
+                // Optionally, you can verify if adminName matches
+                return;
+            }
+
+            setCurrentPlayers(prev => {
+                // Check if player already exists
+                const exists = prev.some(p => p.id === player.id);
+                if (!exists) {
+                    return [...prev, player];
+                }
+                return prev;
+            });
             console.log(`Admin display: Player joined: ${player.name}`);
         });
 
@@ -61,7 +74,7 @@ const Admin = () => {
                 players
             };
             socket.emit('createGame', adminSettings);
-            // setCurrentPlayers([{ id: 'admin', name: adminName }]); // Initialized in createGameResponse
+            // The admin will be added via 'createGameResponse'
         } else {
             setError('Please provide valid game settings.');
         }
