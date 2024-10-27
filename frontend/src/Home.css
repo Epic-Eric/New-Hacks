@@ -1,57 +1,108 @@
-/* Home.css */
+/* src/Home.css */
+
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    min-height: 100vh; /* Allow the page to grow with content */
+    overflow-y: auto; /* Enable vertical scrolling on the entire page */
+    background: #f0f4f8;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
 .home-container {
     display: flex;
+    flex-direction: row;
+    width: 100%;
+    min-height: 100vh; /* Ensures container covers full viewport height */
+    background: linear-gradient(135deg, #5c4d98, #a179c9);
+    color: white;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 25%;
+    min-width: 200px;
+    background-color: rgba(30, 30, 60, 0.7);
+    padding: 20px;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background-color: #5c4d98;
-    color: white;
-    font-family: 'Arial', sans-serif;
+    border-radius: 0 10px 10px 0;
+    flex-shrink: 0;
 }
 
 .game-title {
-    font-size: 100rem; /* Significantly larger font size for title */
-    margin-bottom: 30px;
-    color: white;
+    font-size: 2.8rem;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #e6e6fa;
 }
 
 .emoji {
-    font-size: 7rem; /* Significantly larger font size for emoji */
-    margin-left: 20px;
+    font-size: 2.3rem;
+    margin-left: 10px;
 }
 
-.name-entry {
+/* Main Content Styles */
+.main-content {
+    width: 75%;
+    padding: 20px;
+    overflow-y: auto; /* Ensure independent scrolling */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    color: #f0f4f8;
+}
+
+.form-section, .about-section, .rules-section {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.form-group {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 20px;
 }
 
-.name-label {
+.form-label {
     font-size: 1.2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    margin-bottom: 5px;
+    color: #e0e0e0;
 }
 
-.name-input {
-    padding: 10px;
-    font-size: 1.2rem;
-    margin-top: 5px;
-    width: 100%;
-    max-width: 300px;
+.form-input {
+    padding: 10px 15px;
+    font-size: 1rem;
     border: none;
-    border-radius: 4px;
-    text-align: center;
+    border-radius: 5px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.3);
+    color: #333;
 }
 
-.button-container {
+.form-input::placeholder {
+    color: #d9d9d9;
+}
+
+.form-input:focus {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.button-group {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -65,24 +116,73 @@
     padding: 12px;
     font-size: 1.2rem;
     cursor: pointer;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    text-align: center;
+    color: #f0f4f8;
+    font-weight: bold;
 }
 
 .play-button {
     background-color: #48c774;
 }
 
-.create-game-button {
+.btn-secondary {
     background-color: #007bff;
 }
 
-.about-link {
-    margin-top: 20px;
-    font-size: 1rem;
+.error-message {
+    color: #ff4d4f;
+    font-size: 0.95rem;
     text-align: center;
+    margin-bottom: 10px;
+}
+
+.team-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+
+.member {
+    flex: 1 1 45%;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    color: #f0f4f8;
+}
+
+.member h4 {
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+    color: #e6e6fa;
+}
+
+.member p {
+    margin: 0;
+    font-size: 1rem;
+    color: #d1d1d1;
+}
+
+.rules-list {
+    list-style: decimal inside;
+    padding-left: 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+}
+
+.rules-list li {
+    margin-bottom: 10px;
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(20, 20, 50, 0.5);
+    border-radius: 5px;
+    color: #f0f4f8;
 }
 
 .about-link a {

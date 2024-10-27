@@ -8,12 +8,10 @@ import socket from './socket';
 const Admin = () => {
     const [timer, setTimer] = useState(10);
     const [rounds, setRounds] = useState(3);
-    const [players, setPlayers] = useState(2); // Max players
+    const [players, setPlayers] = useState(2);
     const [lobbyCode, setLobbyCode] = useState('');
-    const [adminName, setAdminName] = useState('Admin'); // You can make this dynamic
-
+    const [adminName, setAdminName] = useState('Admin');
     const [currentPlayers, setCurrentPlayers] = useState([]);
-
     const [error, setError] = useState('');
 
     const navigate = useNavigate(); // Initialize navigate
@@ -21,11 +19,9 @@ const Admin = () => {
 
 
     useEffect(() => {
-        // Listen for createGameResponse
         socket.on('createGameResponse', ({ success, gameId, message }) => {
             if (success) {
                 setLobbyCode(gameId);
-                setCurrentPlayers([]); // Initialize with no players
                 console.log(`Lobby created with code: ${gameId}`);
             } else {
                 setError(message || 'Failed to create game.');
@@ -33,28 +29,31 @@ const Admin = () => {
             }
         });
 
-        // Listen for players joining
         socket.on('playerJoined', (player) => {
-            setCurrentPlayers(prev => [...prev, player]);
-            console.log(`Admin display: Player joined: ${player.name}`);
+            setCurrentPlayers(prevPlayers => {
+                // Check if the player already exists to prevent duplicates
+                if (!prevPlayers.some(p => p.id === player.id)) {
+                    return [...prevPlayers, player];
+                }
+                return prevPlayers;
+            });
+            console.log(`Player joined: ${player.name}`);
         });
 
-        // Listen for players leaving
         socket.on('playerLeft', (player) => {
             setCurrentPlayers(prev => prev.filter(p => p.id !== player.id));
             console.log(`Player left: ${player.name}`);
         });
 
-        // Cleanup on unmount
         return () => {
             socket.off('createGameResponse');
             socket.off('playerJoined');
             socket.off('playerLeft');
         };
-    }, []);
+    }, [adminName]);
 
     const handleCreateGame = () => {
-        setError(''); // Clear any previous error message
+        setError('');
         if (adminName && timer > 0 && rounds > 0 && players > 0) {
             const adminSettings = {
                 adminName,
@@ -63,7 +62,8 @@ const Admin = () => {
                 players
             };
             socket.emit('createGame', adminSettings);
-            setCurrentPlayers([{ id: 'admin', name: adminName }]);
+
+            
         } else {
             setError('Please provide valid game settings.');
         }
@@ -71,7 +71,6 @@ const Admin = () => {
 
     const handleStartGame = () => {
         console.log("Starting game with settings:", { timer, rounds, players: currentPlayers.length });
-        // Emit 'startGame' event to backend
         socket.emit('startGame', lobbyCode);
         // Navigate to game screen
         navigate('/game?name=' + searchParams.get('name'), { state: { timer: parseInt(timer), rounds: parseInt(rounds), players: currentPlayers.map(p => p.name) } });
@@ -155,7 +154,7 @@ const Admin = () => {
                     <button
                         className="start-game-button"
                         onClick={handleStartGame}
-                        disabled={currentPlayers.length < 2} // Example condition
+                        disabled={currentPlayers.length < 2}
                     >
                         Start Game
                     </button>

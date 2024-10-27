@@ -1,5 +1,3 @@
-/* src/Game.css */
-
 /* Disable scrolling */
 html, body {
     height: 100%;
@@ -48,7 +46,7 @@ html, body {
     flex: 1;
     padding: 20px;
     gap: 20px;
-    justify-content: space-between;
+    justify-content: center;
     position: relative; /* Ensure positioning context for children */
 }
 
@@ -92,7 +90,7 @@ html, body {
 }
 
 .video-broadcast {
-    flex: 1.5;
+    flex: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -136,8 +134,11 @@ html, body {
     width: 20%;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center content */
-    text-align: center; /* Center text within */
+    align-items: flex-start;
+    text-align: left;
+    position: absolute;
+    top: 0;
+    right: 20px;
 }
 
 .death-log h2 {
@@ -165,33 +166,33 @@ html, body {
 
 /* Styles for the webcam video */
 .webcam-video {
-    position: fixed;        /* Fix the position relative to the viewport */
-    bottom: 20px;           /* Distance from the bottom */
-    right: 20px;            /* Distance from the right */
-    width: 200px;           /* Set the desired width */
-    height: auto;           /* Maintain aspect ratio */
-    border: 2px solid #ccc; /* Optional: Add a border for better visibility */
-    border-radius: 8px;     /* Optional: Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle shadow */
-    z-index: 1000;          /* Ensure it stays on top of other elements */
-    background-color: #000; /* Optional: Background color if video stream is not available */
-    pointer-events: none;   /* Disable user interactions */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 200px;
+    height: auto;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    background-color: #000;
+    pointer-events: none;
 }
 
 /* Responsive adjustments */
 @media (max-width: 800px) {
     .webcam-video {
-        width: 150px;       /* Reduce width on smaller screens */
-        bottom: 15px;       /* Adjust distance from bottom */
-        right: 15px;        /* Adjust distance from right */
+        width: 150px;
+        bottom: 15px;
+        right: 15px;
     }
 }
 
 @media (max-width: 500px) {
     .webcam-video {
-        width: 120px;       /* Further reduce width on very small screens */
-        bottom: 10px;       /* Adjust distance from bottom */
-        right: 10px;        /* Adjust distance from right */
+        width: 120px;
+        bottom: 10px;
+        right: 10px;
     }
 }
 
@@ -201,7 +202,6 @@ html, body {
 }
 
 body {
-    /* Remove padding-bottom since scrolling is disabled */
     margin: 0;
     padding: 0;
 }
@@ -209,15 +209,15 @@ body {
 .video-container {
     position: relative;
     width: 100%;
-    max-width: 800px; /* Adjust as needed */
-    height: 450px; /* Adjust as needed */
-    margin: 0 auto; /* Center the video */
+    max-width: 800px;
+    height: 450px;
+    margin: 0 auto;
 }
 
 .youtube-iframe {
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Prevent interactions */
+    pointer-events: none;
 }
 
 .overlay {
@@ -226,7 +226,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0); /* Transparent to disable interactions */
-    z-index: 1; /* Place above the iframe */
-    cursor: default; /* Optional: Cursor style to indicate non-interactive */
+    background: rgba(255, 255, 255, 0);
+    z-index: 1;
+    cursor: default;
 }

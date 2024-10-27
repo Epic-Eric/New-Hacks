@@ -205,7 +205,19 @@ const Game = () => {
                     </div>
                 </div>
 
-
+                { <div className="main-video-container">
+                    <div className="video-container">
+                        <iframe
+                            className="youtube-iframe"
+                            src={currentVideoUrl}
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allowFullScreen={false}
+                            allow="autoplay; encrypted-media;"
+                        ></iframe>
+                        <div className="overlay"></div>
+                    </div>
+                </div> }
 
                 <div className="death-log">
                     <h2>Death Log</h2>

@@ -1,104 +1,152 @@
 /* Admin.css */
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 .admin-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #5c4d98;
-    color: white;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    color: #333;
     font-family: 'Arial', sans-serif;
+    overflow-y: auto;
 }
 
 h1 {
-    margin-bottom: 20px;
+    font-size: 2.5rem;
+    color: #5c4d98;
+    margin-bottom: 40px;
+    text-align: center;
 }
 
-.admin-content {
+.create-game, .lobby-info {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.create-game label, .settings label {
     display: flex;
-    width: 80%;
     justify-content: space-between;
-}
-
-/* Player List with Boxes and Emojis */
-.player-list {
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.player-list h2 {
-    margin-bottom: 10px;
-}
-
-.player-icons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-}
-
-.player-box {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    background-color: #6b5fb5;
-    border-radius: 8px;
-    padding: 6px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.player-emoji {
-    font-size: 1.2rem;
-    margin-right: 6px;
-}
-
-.player-name {
+    color: #555;
     font-size: 1rem;
-    color: white;
-}
-
-/* Settings and Controls */
-.settings {
-    width: 60%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-label {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    color: white;
+    margin-bottom: 12px;
+    align-items: center;
 }
 
 input[type="number"], input[type="text"] {
-    padding: 8px;
+    padding: 10px;
     font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
     width: 60%;
-    margin-left: 10px;
+    color: #333;
+    transition: border-color 0.3s ease;
+}
+
+input[type="number"]:focus, input[type="text"]:focus {
+    border-color: #5c4d98;
+    outline: none;
 }
 
 button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     font-size: 1rem;
-    cursor: pointer;
-    color: white;
+    font-weight: bold;
+    color: #fff;
     border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    max-width: 220px;
+    margin-top: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .start-game-button {
     background-color: #48c774;
 }
 
-.invite-button {
-    background-color: #007bff;
+.start-game-button:hover {
+    background-color: #3da85f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.home-button {
-    background-color: #ff5c5c;
+.copy-link-button {
+    background-color: #007bff;
+    margin-bottom: 20px;
+}
+
+.copy-link-button:hover {
+    background-color: #0069d9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+h2 {
+    font-size: 1.8rem;
+    color: #5c4d98;
+    margin-bottom: 15px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: #f0f4f8;
+    margin: 5px 0;
+    padding: 8px 12px;
+    border-radius: 5px;
+    color: #333;
+    font-weight: bold;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .create-game, .lobby-info {
+        padding: 20px 30px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    input[type="number"], input[type="text"] {
+        width: 100%;
+    }
 }
