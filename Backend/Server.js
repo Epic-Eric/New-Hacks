@@ -14,15 +14,7 @@ const allowedOrigins = ['https://krackle.co', 'https://www.krackle.co'];
 
 // CORS Configuration
 app.use(cors({
-    origin: function(origin, callback){
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if(!origin) return callback(null, true);
-        if(allowedOrigins.indexOf(origin) === -1){
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
+    origin: allowedOrigins, // Allow specific origins
     methods: ["GET", "POST"],
     credentials: true
 }));
@@ -30,7 +22,7 @@ app.use(cors({
 // Initialize Socket.IO with updated CORS
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
+        origin: allowedOrigins, // Allow specific origins
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -88,11 +80,6 @@ io.on('connection', (socket) => {
                 // Emit 'playerJoined' to the lobby
                 io.to(lobbyCode).emit('playerJoined', player);
 
-                // Optionally, emit 'gameStarted' when lobby is ready
-                // if (lobby.players.length === lobby.settings.maxPlayers) {
-                //     io.to(lobbyCode).emit('gameStarted', lobby.settings);
-                // }
-
                 // Emit successful join to the player
                 socket.emit('joinLobbyResponse', { success: true, lobbyCode });
             } else {
@@ -134,9 +121,8 @@ io.on('connection', (socket) => {
                 io.to(gameId).emit('playerLeft', removedPlayer);
             }
 
-            // If the disconnected user was the admin, you might want to handle lobby closure or admin reassignment
+            // If the disconnected user was the admin, handle lobby closure
             if (lobby.admin === socket.id) {
-                // Optionally, close the lobby or assign a new admin
                 delete lobbies[gameId];
                 // Emit 'lobbyClosed' if necessary
                 io.to(gameId).emit('lobbyClosed', { message: 'Lobby has been closed by the admin.' });

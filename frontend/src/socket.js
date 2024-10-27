@@ -7,6 +7,7 @@ console.log('SERVER_URL:', SERVER_URL); // Add this line for debugging
 
 const socket = io(SERVER_URL, {
     withCredentials: true,
+    transports: ['websocket'], // Force websocket transport
 });
 
 // Handle connection events
