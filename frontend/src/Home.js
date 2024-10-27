@@ -1,4 +1,4 @@
-
+// src/Home.js
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -33,6 +33,17 @@ const Home = () => {
             setIsLoading(false);
         });
 
+        // Listen for joinLobbyResponse
+        socket.on('joinLobbyResponse', ({ success, lobbyCode, message }) => {
+            if (success) {
+                console.log(`Successfully joined lobby: ${lobbyCode}`);
+                // Optionally, you can update UI or navigate
+            } else {
+                setError(message || 'Failed to join lobby.');
+                setIsLoading(false);
+            }
+        });
+
         // Listen for game start
         socket.on('gameStarted', (gameSettings) => {
             console.log("Received 'gameStarted' event:", gameSettings);
@@ -42,9 +53,10 @@ const Home = () => {
 
         // Cleanup listeners on unmount
         return () => {
-            console.log("Cleaning up 'playerJoined', 'lobbyNotFound', and 'gameStarted' listeners");
+            console.log("Cleaning up 'playerJoined', 'lobbyNotFound', 'joinLobbyResponse', and 'gameStarted' listeners");
             socket.off('playerJoined');
             socket.off('lobbyNotFound');
+            socket.off('joinLobbyResponse');
             socket.off('gameStarted');
         };
     }, [location.search, navigate]);
@@ -71,7 +83,7 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <h1 className="game-title">krakle.co <span className="emoji">😄</span></h1>
+            <h1 className="game-title">krackle.co <span className="emoji">😄</span></h1>
             <div className="name-entry">
                 <label className="name-label">
                     Name:

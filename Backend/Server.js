@@ -3,8 +3,8 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const cors = require('cors');
 const crypto = require('crypto');
-const cors = require('cors'); // If not already included
 
 // new
 // const multer = require('multer');
@@ -14,173 +14,132 @@ const cors = require('cors'); // If not already included
 const app = express();
 const server = http.createServer(app);
 
+// Define allowed origins
+const allowedOrigins = ['https://krackle.co', 'https://www.krackle.co'];
+
 // CORS Configuration
+app.use(cors({
+    origin: allowedOrigins, // Allow specific origins
+    methods: ["GET", "POST"],
+    credentials: true
+}));
+
+// Initialize Socket.IO with updated CORS
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000", // Your React app's origin
+        origin: allowedOrigins, // Allow specific origins
         methods: ["GET", "POST"],
         credentials: true
     }
 });
 
-//storage code
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, path.join(__dirname, 'public/uploads'));  // Save files to 'public/uploads'
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, Date.now() + '-' + file.originalname);  // Use timestamp to avoid conflicts
-//     }
-// });
+// Serve static files or set up routes as needed
+app.get('/', (req, res) => {
+    res.send('Socket.IO Backend is running.');
+});
 
-// const upload = multer({ storage: storage });
-
-// // Serve static files from the 'public' folder
-// app.use(express.static(path.join(__dirname, 'public')));
-
-// // Image upload endpoint
-// app.post('/upload_image', upload.single('image'), (req, res) => {
-//     if (!req.file) {
-//         return res.status(400).json({ message: 'No file uploaded' });
-//     }
-    
-//     const fileUrl = `/uploads/${req.file.filename}`;
-//     res.json({ message: 'Image uploaded successfully', fileUrl: fileUrl });
-// });
-
-// If your server serves HTTP routes, configure CORS for Express
-app.use(cors({
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-    credentials: true
-}));
-
+// In-memory storage for lobbies
 const lobbies = {};
 
+// Socket.IO Event Handling
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    // Handle lobby creation with admin settings
-    socket.on('createLobby', (adminSettings) => {
-        let lobbyCode;
-        do {
-            lobbyCode = crypto.randomBytes(3).toString('hex'); // 6-character code
-        } while (lobbies[lobbyCode]); // Ensure uniqueness
+    // Handle 'createGame' event from frontend
+    socket.on('createGame', (gameData) => {
+        console.log('Create Game Event Received:', gameData);
+        
+        // Generate a unique game ID
+        const gameId = crypto.randomBytes(4).toString('hex');
 
-        lobbies[lobbyCode] = { 
-            players: [{ id: socket.id, name: adminSettings.adminName }],
+        // Create a new lobby
+        lobbies[gameId] = {
+            admin: socket.id,
             settings: {
-                timer: adminSettings.timer,
-                rounds: adminSettings.rounds,
-                maxPlayers: adminSettings.players
-            }
+                adminName: gameData.adminName,
+                timer: gameData.timer,
+                rounds: gameData.rounds,
+                maxPlayers: gameData.players
+            },
+            players: []
         };
-        socket.join(lobbyCode);
-        socket.emit('lobbyCreated', { lobbyCode, players: lobbies[lobbyCode].players });
-        console.log(`Lobby ${lobbyCode} created by ${adminSettings.adminName}`);
+
+        // **Join the admin to the lobby room**
+        socket.join(gameId);
+
+        // Emit 'createGameResponse' back to the admin client
+        socket.emit('createGameResponse', { success: true, gameId });
+
+        // Optional: Notify all clients about the new lobby
+        // io.emit('lobbyCreated', { lobbyCode: gameId, players: lobbies[gameId].players });
     });
 
-    // Handle players joining a lobby
+    // Handle 'joinLobby' event from frontend
     socket.on('joinLobby', ({ lobbyCode, playerName }) => {
-        if (lobbies[lobbyCode]) {
-            const lobby = lobbies[lobbyCode];
-            if (lobby.players.length >= lobby.settings.maxPlayers) {
-                socket.emit('lobbyFull');
-                console.log(`Lobby ${lobbyCode} is full. Player ${playerName} (${socket.id}) cannot join.`);
-                return;
+        console.log(`Join Lobby Event Received: LobbyCode=${lobbyCode}, PlayerName=${playerName}`);
+
+        const lobby = lobbies[lobbyCode];
+        if (lobby) {
+            if (lobby.players.length < lobby.settings.maxPlayers) {
+                const player = { id: socket.id, name: playerName };
+                lobby.players.push(player);
+                socket.join(lobbyCode);
+
+                // Emit 'playerJoined' to the lobby room
+                io.to(lobbyCode).emit('playerJoined', player);
+
+                // Emit successful join to the player
+                socket.emit('joinLobbyResponse', { success: true, lobbyCode });
+            } else {
+                // Lobby full
+                socket.emit('joinLobbyResponse', { success: false, message: 'Lobby is full.' });
             }
-
-            lobby.players.push({ id: socket.id, name: playerName });
-            socket.join(lobbyCode);
-            io.to(lobbyCode).emit('playerJoined', { id: socket.id, name: playerName });
-            console.log(`User ${playerName} (${socket.id}) joined lobby ${lobbyCode}`);
         } else {
-            socket.emit('lobbyNotFound');
-            console.log(`Lobby not found: ${lobbyCode}`);
+            // Lobby not found
+            socket.emit('joinLobbyResponse', { success: false, message: 'Lobby not found.' });
         }
     });
 
-    // Handle game start
-    socket.on('startGame', ({ lobbyCode }) => {
-        if (lobbies[lobbyCode]) {
-            const lobby = lobbies[lobbyCode];
-            io.to(lobbyCode).emit('gameStarted', {
-                timer: lobby.settings.timer,
-                rounds: lobby.settings.rounds
-            });
-            console.log(`Game started in lobby ${lobbyCode}`);
+    // Handle 'startGame' event from admin
+    socket.on('startGame', (lobbyCode) => {
+        console.log(`Start Game Event Received for LobbyCode=${lobbyCode}`);
+
+        const lobby = lobbies[lobbyCode];
+        if (lobby && lobby.admin === socket.id) {
+            // Emit 'gameStarted' to all players in the lobby
+            io.to(lobbyCode).emit('gameStarted', lobby.settings);
+
+            // Optionally, handle game logic here
         } else {
-            socket.emit('lobbyNotFound');
-            console.log(`Cannot start game. Lobby not found: ${lobbyCode}`);
+            // Unauthorized or lobby not found
+            socket.emit('startGameResponse', { success: false, message: 'Unauthorized or lobby not found.' });
         }
     });
 
-    // Handle disconnections
+    // Handle disconnection
     socket.on('disconnect', () => {
-        for (const lobbyCode in lobbies) {
-            const playerIndex = lobbies[lobbyCode].players.findIndex(player => player.id === socket.id);
-            if (playerIndex !== -1) {
-                const player = lobbies[lobbyCode].players.splice(playerIndex, 1)[0];
-                io.to(lobbyCode).emit('playerLeft', { id: socket.id, name: player.name });
-                console.log(`Player ${player.name} (${socket.id}) left lobby ${lobbyCode}`);
+        console.log('User disconnected:', socket.id);
 
-                if (lobbies[lobbyCode].players.length === 0) {
-                    delete lobbies[lobbyCode];
-                    console.log(`Lobby ${lobbyCode} deleted as it became empty.`);
-                }
-                break;
+        // Remove player from any lobbies they were part of
+        for (const [gameId, lobby] of Object.entries(lobbies)) {
+            const playerIndex = lobby.players.findIndex(p => p.id === socket.id);
+            if (playerIndex !== -1) {
+                const [removedPlayer] = lobby.players.splice(playerIndex, 1);
+                // Emit 'playerLeft' to the lobby
+                io.to(gameId).emit('playerLeft', removedPlayer);
+            }
+
+            // If the disconnected user was the admin, handle lobby closure
+            if (lobby.admin === socket.id) {
+                delete lobbies[gameId];
+                // Emit 'lobbyClosed' if necessary
+                io.to(gameId).emit('lobbyClosed', { message: 'Lobby has been closed by the admin.' });
             }
         }
-        console.log('User disconnected:', socket.id);
     });
 });
 
 const PORT = process.env.PORT || 4001;
 server.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
-
-// server.js
-
-io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
-
-    // Handle players joining a lobby
-    socket.on('joinLobby', ({ lobbyCode, playerName }) => {
-        if (lobbies[lobbyCode]) {
-            const lobby = lobbies[lobbyCode];
-            if (lobby.players.length >= lobby.settings.maxPlayers) {
-                socket.emit('lobbyFull');
-                console.log(`Lobby ${lobbyCode} is full. Player ${playerName} (${socket.id}) cannot join.`);
-                return;
-            }
-
-            lobby.players.push({ id: socket.id, name: playerName });
-            socket.join(lobbyCode);
-            io.to(lobbyCode).emit('playerJoined', { id: socket.id, name: playerName });
-            console.log(`User ${playerName} (${socket.id}) joined lobby ${lobbyCode}`);
-        } else {
-            socket.emit('lobbyNotFound');
-            console.log(`Lobby not found: ${lobbyCode}`);
-        }
-    });
-
-    // Handle game start
-    socket.on('startGame', ({ lobbyCode }) => {
-        if (lobbies[lobbyCode]) {
-            const lobby = lobbies[lobbyCode];
-            console.log(`Starting game in lobby ${lobbyCode} with settings:`, lobby.settings);
-            
-            io.to(lobbyCode).emit('gameStarted', {
-                timer: lobby.settings.timer,
-                rounds: lobby.settings.rounds,
-                players: lobby.players // Pass players to the client
-            });
-            console.log(`Game started in lobby ${lobbyCode}`);
-        } else {
-            socket.emit('lobbyNotFound');
-            console.log(`Cannot start game. Lobby not found: ${lobbyCode}`);
-        }
-    });
-});
-

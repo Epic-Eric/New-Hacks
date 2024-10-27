@@ -121,23 +121,15 @@ html, body {
     background-color: #000;
     border-radius: 8px;
     overflow: hidden;
+    position: relative; /* Ensure positioning context for inner elements */
+    z-index: 1; /* Ensure it's below the webcam */
 }
 
 .main-video-player {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.video-placeholder {
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    color: #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
+    pointer-events: none; /* Disable user interactions */
 }
 
 .death-log {
@@ -183,6 +175,7 @@ html, body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle shadow */
     z-index: 1000;          /* Ensure it stays on top of other elements */
     background-color: #000; /* Optional: Background color if video stream is not available */
+    pointer-events: none;   /* Disable user interactions */
 }
 
 /* Responsive adjustments */
@@ -211,4 +204,29 @@ body {
     /* Remove padding-bottom since scrolling is disabled */
     margin: 0;
     padding: 0;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+    height: 450px; /* Adjust as needed */
+    margin: 0 auto; /* Center the video */
+}
+
+.youtube-iframe {
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Prevent interactions */
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0); /* Transparent to disable interactions */
+    z-index: 1; /* Place above the iframe */
+    cursor: default; /* Optional: Cursor style to indicate non-interactive */
 }
