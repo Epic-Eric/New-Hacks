@@ -1,6 +1,6 @@
 // src/Admin.js
 
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect } from 'react';
 import './Admin.css'; // Import the CSS for styling
 import { useNavigate } from 'react-router-dom';
 import socket from './socket';
@@ -14,14 +14,21 @@ const Admin = () => {
 
     const [currentPlayers, setCurrentPlayers] = useState([]);
 
+    const [error, setError] = useState('');
+
     const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
-        // Listen for lobby creation
-        socket.on('lobbyCreated', ({ lobbyCode, players }) => {
-            setLobbyCode(lobbyCode);
-            setCurrentPlayers(players);
-            console.log(`Lobby created with code: ${lobbyCode}`);
+        // Listen for createGameResponse
+        socket.on('createGameResponse', ({ success, gameId, message }) => {
+            if (success) {
+                setLobbyCode(gameId);
+                setCurrentPlayers([]); // Initialize with no players
+                console.log(`Lobby created with code: ${gameId}`);
+            } else {
+                setError(message || 'Failed to create game.');
+                console.error('Failed to create game:', message);
+            }
         });
 
         // Listen for players joining
@@ -38,20 +45,25 @@ const Admin = () => {
 
         // Cleanup on unmount
         return () => {
-            socket.off('lobbyCreated');
+            socket.off('createGameResponse');
             socket.off('playerJoined');
             socket.off('playerLeft');
         };
     }, []);
 
     const handleCreateGame = () => {
-        const adminSettings = {
-            adminName,
-            timer,
-            rounds,
-            players
-        };
-        socket.emit('createLobby', adminSettings);
+        setError(''); // Clear any previous error message
+        if (adminName && timer > 0 && rounds > 0 && players > 0) {
+            const adminSettings = {
+                adminName,
+                timer,
+                rounds,
+                players
+            };
+            socket.emit('createGame', adminSettings);
+        } else {
+            setError('Please provide valid game settings.');
+        }
     };
 
     const handleStartGame = () => {
@@ -119,6 +131,7 @@ const Admin = () => {
                             />
                         </label>
                     </div>
+                    {error && <p className="error-message">{error}</p>}
                     <button className="start-game-button" onClick={handleCreateGame}>
                         Create Game
                     </button>
