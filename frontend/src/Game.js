@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import './Game.css';
 
 // Using a publicly hosted sample video for demonstration
-// const MAIN_VIDEO_URL = 'https://www.youtube.com/shorts/qjckWVDjxoI';
+const MAIN_VIDEO_URL = 'https://www.youtube.com/shorts/qjckWVDjxoI';
 
 const emojis = ['😀', '😆', '😅', '😂', '🤣', '😊', '😍', '😎', '🤩', '🥳', '😜', '🤪'];
 
@@ -193,7 +193,19 @@ const Game = () => {
                     </div>
                 </div>
 
-
+                <div className="main-video-container">
+                    <div className="video-container">
+                    <iframe
+                        className="youtube-iframe"
+                        src={MAIN_VIDEO_URL} // Added autoplay=1 here
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allowFullScreen={false}
+                        allow="autoplay; encrypted-media;"
+                    ></iframe>
+                        <div className="overlay"></div>
+                    </div>
+                </div>
 
                 <div className="death-log">
                     <h2>Death Log</h2>
