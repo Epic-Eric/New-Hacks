@@ -31,7 +31,7 @@ const Game = () => {
         // Listen for players joining
         socket.on('playerJoined', (player) => {
             setPlayers(prev => [...prev, player]);
-            console.log(`Player joined: ${player.name}`);
+            console.log(`Game display: player joined: ${player.name}`);
         });
 
         // Listen for players leaving
@@ -79,20 +79,20 @@ const Game = () => {
                 const formData = new FormData();
                 formData.append('image', blob, 'frame.jpg');
 
-                // Send the image to the Python server for smile detection
+                // Send the image to the js server for smile detection
                 try {
-                    const response = await fetch('http://localhost:5001/detect_smile', {
+                    const response = await fetch('/upload_image', {
                         method: 'POST',
                         body: formData
                     });
                     const result = await response.json();
-
-                    if (result.smile_detected) {
-                        setSmileDetected(true);
-                        socket.emit('smile_detected');  // Emit event if a smile is detected
-                    } else {
-                        setSmileDetected(false);
-                    }
+                    console.log('successfully uploaded')
+                    // if (result.smile_detected) {
+                    //     setSmileDetected(true);
+                    //     socket.emit('smile_detected');  // Emit event if a smile is detected
+                    // } else {
+                    //     setSmileDetected(false);
+                    // }
                 } catch (error) {
                     console.error('Error detecting smile:', error);
                 }

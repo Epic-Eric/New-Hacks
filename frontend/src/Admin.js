@@ -27,7 +27,7 @@ const Admin = () => {
         // Listen for players joining
         socket.on('playerJoined', (player) => {
             setCurrentPlayers(prev => [...prev, player]);
-            console.log(`Player joined: ${player.name}`);
+            console.log(`Admin display: Player joined: ${player.name}`);
         });
 
         // Listen for players leaving

@@ -6,6 +6,11 @@ const { Server } = require('socket.io');
 const crypto = require('crypto');
 const cors = require('cors'); // If not already included
 
+// new
+// const multer = require('multer');
+// const path = require('path');
+
+
 const app = express();
 const server = http.createServer(app);
 
@@ -17,6 +22,31 @@ const io = new Server(server, {
         credentials: true
     }
 });
+
+//storage code
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, path.join(__dirname, 'public/uploads'));  // Save files to 'public/uploads'
+//     },
+//     filename: (req, file, cb) => {
+//         cb(null, Date.now() + '-' + file.originalname);  // Use timestamp to avoid conflicts
+//     }
+// });
+
+// const upload = multer({ storage: storage });
+
+// // Serve static files from the 'public' folder
+// app.use(express.static(path.join(__dirname, 'public')));
+
+// // Image upload endpoint
+// app.post('/upload_image', upload.single('image'), (req, res) => {
+//     if (!req.file) {
+//         return res.status(400).json({ message: 'No file uploaded' });
+//     }
+    
+//     const fileUrl = `/uploads/${req.file.filename}`;
+//     res.json({ message: 'Image uploaded successfully', fileUrl: fileUrl });
+// });
 
 // If your server serves HTTP routes, configure CORS for Express
 app.use(cors({
