@@ -13,6 +13,7 @@ const Admin = () => {
     const [adminName, setAdminName] = useState('Admin'); // You can make this dynamic
 
     const [currentPlayers, setCurrentPlayers] = useState([]);
+
     const [error, setError] = useState('');
 
     const navigate = useNavigate(); // Initialize navigate
@@ -22,7 +23,7 @@ const Admin = () => {
         socket.on('createGameResponse', ({ success, gameId, message }) => {
             if (success) {
                 setLobbyCode(gameId);
-                setCurrentPlayers([{ id: 'admin', name: adminName }]); // Initialize with admin as first player
+                setCurrentPlayers([]); // Initialize with no players
                 console.log(`Lobby created with code: ${gameId}`);
             } else {
                 setError(message || 'Failed to create game.');
@@ -48,11 +49,11 @@ const Admin = () => {
             socket.off('playerJoined');
             socket.off('playerLeft');
         };
-    }, [adminName]);
+    }, []);
 
     const handleCreateGame = () => {
         setError(''); // Clear any previous error message
-        if (adminName.trim() !== '' && timer > 0 && rounds > 0 && players > 0) {
+        if (adminName && timer > 0 && rounds > 0 && players > 0) {
             const adminSettings = {
                 adminName,
                 timer,
@@ -60,18 +61,13 @@ const Admin = () => {
                 players
             };
             socket.emit('createGame', adminSettings);
-            // setCurrentPlayers([{ id: 'admin', name: adminName }]); // Initialized in createGameResponse
+            setCurrentPlayers([{ id: 'admin', name: adminName }]);
         } else {
             setError('Please provide valid game settings.');
         }
     };
 
     const handleStartGame = () => {
-        if (currentPlayers.length < 2) {
-            setError('At least 2 players are required to start the game.');
-            return;
-        }
-
         console.log("Starting game with settings:", { timer, rounds, players: currentPlayers.length });
         // Emit 'startGame' event to backend
         socket.emit('startGame', lobbyCode);
@@ -96,88 +92,75 @@ const Admin = () => {
 
     return (
         <div className="admin-container">
-            <h1 className="admin-title">Admin Panel</h1>
+            <h1>Admin Panel</h1>
             {!lobbyCode ? (
-                <div className="create-game-section">
-                    <h2>Create a New Game</h2>
-                    <div className="form-group">
-                        <label htmlFor="adminName">Admin Name:</label>
+                <div className="create-game">
+                    <label>
+                        Admin Name:
                         <input
                             type="text"
-                            id="adminName"
                             value={adminName}
                             onChange={(e) => setAdminName(e.target.value)}
                             placeholder="Enter your name"
                         />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="timer">Timer (seconds):</label>
-                        <input
-                            type="number"
-                            id="timer"
-                            value={timer}
-                            onChange={(e) => setTimer(Number(e.target.value))}
-                            min="1"
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="rounds">Rounds:</label>
-                        <input
-                            type="number"
-                            id="rounds"
-                            value={rounds}
-                            onChange={(e) => setRounds(Number(e.target.value))}
-                            min="1"
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="players">Max Players:</label>
-                        <input
-                            type="number"
-                            id="players"
-                            value={players}
-                            onChange={(e) => setPlayers(Number(e.target.value))}
-                            min="1"
-                        />
+                    </label>
+                    <div className="settings">
+                        <label>
+                            Timer (seconds):
+                            <input
+                                type="number"
+                                value={timer}
+                                onChange={(e) => setTimer(Number(e.target.value))}
+                                min="1"
+                            />
+                        </label>
+                        <label>
+                            Rounds:
+                            <input
+                                type="number"
+                                value={rounds}
+                                onChange={(e) => setRounds(Number(e.target.value))}
+                                min="1"
+                            />
+                        </label>
+                        <label>
+                            Max Players:
+                            <input
+                                type="number"
+                                value={players}
+                                onChange={(e) => setPlayers(Number(e.target.value))}
+                                min="1"
+                            />
+                        </label>
                     </div>
                     {error && <p className="error-message">{error}</p>}
-                    <button className="btn create-game-button" onClick={handleCreateGame}>
+                    <button className="start-game-button" onClick={handleCreateGame}>
                         Create Game
                     </button>
                 </div>
             ) : (
-                <div className="lobby-info-section">
-                    <h2>Game Lobby</h2>
+                <div className="lobby-info">
                     <p><strong>Lobby Code:</strong> {lobbyCode}</p>
-                    <button className="btn copy-link-button" onClick={handleCopyLink}>
+                    <button className="copy-link-button" onClick={handleCopyLink}>
                         Copy Invite Link
                     </button>
-                    <div className="players-section">
-                        <h3>Players Joined:</h3>
-                        <ul className="player-list">
-                            {currentPlayers.map(player => (
-                                <li key={player.id} className="player-item">
-                                    <span className="player-emoji">👤</span> {player.name}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                    {currentPlayers.length >= 2 && (
-                        <button className="btn start-game-button" onClick={handleStartGame}>
-                            Start Game
-                        </button>
-                    )}
-                    {currentPlayers.length < 2 && (
-                        <p className="info-message">Waiting for more players to join...</p>
-                    )}
-                    <button className="btn go-home-button" onClick={handleGoHome}>
-                        Go Home
+                    <h2>Players Joined:</h2>
+                    <ul>
+                        {currentPlayers.map(player => (
+                            <li key={player.id}>{player.name}</li>
+                        ))}
+                    </ul>
+                    <button
+                        className="start-game-button"
+                        onClick={handleStartGame}
+                        disabled={currentPlayers.length < 2} // Example condition
+                    >
+                        Start Game
                     </button>
                 </div>
             )}
         </div>
     );
-
 };
 
 export default Admin;
