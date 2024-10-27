@@ -1,3 +1,5 @@
+// src/Game.js
+
 import React, { useEffect, useState, useRef } from 'react';
 import socket from './socket';
 import { useLocation } from 'react-router-dom';
@@ -16,7 +18,7 @@ const Game = () => {
     const [smileDetected, setSmileDetected] = useState(false);
     const [webcamError, setWebcamError] = useState(null);  // State to track webcam errors
 
-    const videoRef = useRef(null);  // Use useRef to reference the video element
+    const videoRef = useRef(null);  // Reference to the video element
 
     useEffect(() => {
         // Listen for players joining
@@ -55,8 +57,8 @@ const Game = () => {
 
     // Capture webcam frame and send it to Python server
     const captureAndSendFrame = async () => {
-        const videoElement = videoRef.current;  // Get the video element reference from useRef
-        
+        const videoElement = videoRef.current;  // Get the video element reference
+
         // Ensure the video element is ready before capturing the frame
         if (videoElement && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
             const canvas = document.createElement('canvas');
@@ -103,16 +105,16 @@ const Game = () => {
                 }
 
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                
+
                 // Debug the stream object
                 console.log('Stream object:', stream);
-                
-                const videoElement = videoRef.current;  // Get the video element reference from useRef
-                
+
+                const videoElement = videoRef.current;  // Get the video element reference
+
                 if (videoElement) {
                     // Debug the video element before assignment
                     console.log('Video element:', videoElement);
-                    
+
                     videoElement.srcObject = stream;
 
                     // Ensure the video is ready before capturing frames
@@ -133,8 +135,14 @@ const Game = () => {
         // Capture frames every second
         const intervalId = setInterval(captureAndSendFrame, 1000);
 
-        // Cleanup the interval on component unmount
-        return () => clearInterval(intervalId);
+        // Cleanup the interval and stop webcam on component unmount
+        return () => {
+            clearInterval(intervalId);
+            // Stop all video tracks to release the webcam
+            if (videoRef.current && videoRef.current.srcObject) {
+                videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+            }
+        };
     }, []);
 
     return (
@@ -165,7 +173,13 @@ const Game = () => {
                 <div className="video-broadcast">
                     <h2 className="live-broadcast-title">Live Broadcast</h2>
                     {/* Webcam Video Element */}
-                    <video ref={videoRef} id="webcam" autoPlay playsInline></video>
+                    <video 
+                        ref={videoRef} 
+                        id="webcam" 
+                        autoPlay 
+                        playsInline 
+                        className="webcam-video"  // Added className for styling
+                    ></video>
                 </div>
 
                 <div className="death-log">
