@@ -114,7 +114,7 @@ const Game = () => {
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                if(len(data) > 0){
+                if(data[0][3] + data[0][6] > 0){
                     navigate('/lost');
                 }
                 // if(Math.random() < 0.1){
