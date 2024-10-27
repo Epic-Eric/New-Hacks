@@ -37,34 +37,20 @@
 
 
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import socket from './socket';
+
+// src/Loading.js
+
+import React from 'react';
 import './Loading.css';
 
 const Loading = () => {
-    const navigate = useNavigate();
 
-    useEffect(() => {
-        // Listen for the gameStarted event from the server
-        socket.on('gameStarted', (gameSettings) => {
-            console.log("Received 'gameStarted' event in Loading component:", gameSettings);
-
-            // Ensure gameSettings are valid before navigating
-            if (gameSettings && gameSettings.timer && gameSettings.rounds && gameSettings.players) {
-                console.log("Navigating to game screen with settings:", gameSettings);
-                navigate('/game', { state: { ...gameSettings } });
-            } else {
-                console.error("Invalid game settings received:", gameSettings);
-            }
-        });
-
-        // Clean up the event listener on unmount
-        return () => {
-            console.log("Cleaning up 'gameStarted' listener");
-            socket.off('gameStarted');
-        };
-    }, [navigate]);
+    // const navigate = useNavigate();
+    // socket.on('gameStarted', (gameSettings) => {
+    //     console.log("Received 'gameStarted' event:", gameSettings);
+    //     setIsLoading(false);
+    //     navigate('/game', { state: { ...gameSettings } });
+    // });
 
     return (
         <div className="loading-container">
