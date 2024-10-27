@@ -6,7 +6,13 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import './Game.css';
 
 // Using a publicly hosted sample video for demonstration
-// const MAIN_VIDEO_URL = 'https://www.youtube.com/shorts/qjckWVDjxoI';
+const URL = [
+    'https://www.youtube.com/embed/qjckWVDjxoI?autoplay=1',
+    'https://www.youtube.com/embed/GPIP6Q6WOfk?autoplay=1',
+    'https://www.youtube.com/embed/thY3TbclJ2c?autoplay=1',
+    'https://www.youtube.com/embed/p-d87-zmtbc?autoplay=1',
+    'https://www.youtube.com/embed/z22jKvMYHOY?autoplay=1'
+];
 
 const emojis = ['😀', '😆', '😅', '😂', '🤣', '😊', '😍', '😎', '🤩', '🥳', '😜', '🤪'];
 
@@ -20,11 +26,25 @@ const Game = () => {
     const [players, setPlayers] = useState(initialPlayers);
     const [smileDetected, setSmileDetected] = useState(false);
     const [webcamError, setWebcamError] = useState(null);  // State to track webcam errors
+    
+    const [currentVideoUrl, setCurrentVideoUrl] = useState(URL[Math.floor(Math.random() * URL.length)]);
+
+    
+    
     const [searchParams] = useSearchParams();
     const name = searchParams.get('name');
     const navigate = useNavigate();
 
     const videoRef = useRef(null);  // Reference to the webcam video element
+
+
+    const changeVideo = () => {
+        let newVideoUrl;
+        do {
+            newVideoUrl = URL[Math.floor(Math.random() * URL.length)];
+        } while (newVideoUrl === currentVideoUrl);
+        setCurrentVideoUrl(newVideoUrl);
+    };
 
     useEffect(() => {
         console.log(socket.id);
@@ -52,7 +72,8 @@ const Game = () => {
         if (timer > 0) {
             const countdown = setInterval(() => setTimer((prev) => Math.max(prev - 1, 0)), 1000);
             return () => clearInterval(countdown);
-        } else if (round > 1) {
+        } else {
+            changeVideo();
             setTimer(initialTimer);
             setRound((prevRound) => prevRound - 1);
         }
@@ -205,7 +226,19 @@ const Game = () => {
                     </div>
                 </div>
 
-
+                { <div className="main-video-container">
+                    <div className="video-container">
+                        <iframe
+                            className="youtube-iframe"
+                            src={currentVideoUrl}
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allowFullScreen={false}
+                            allow="autoplay; encrypted-media;"
+                        ></iframe>
+                        <div className="overlay"></div>
+                    </div>
+                </div> }
 
                 <div className="death-log">
                     <h2>Death Log</h2>
