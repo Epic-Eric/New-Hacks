@@ -68,8 +68,9 @@ const Admin = () => {
 
     const handleStartGame = () => {
         console.log("Starting game with settings:", { timer, rounds, players: currentPlayers.length });
-        // Implement game start logic, e.g., navigate to game screen
-        socket.emit('startGame', { lobbyCode });
+        // Emit 'startGame' event to backend
+        socket.emit('startGame', lobbyCode);
+        // Navigate to game screen
         navigate('/game', { state: { timer: parseInt(timer), rounds: parseInt(rounds), players: currentPlayers.map(p => p.name) } });
     };
 
