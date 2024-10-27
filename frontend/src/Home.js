@@ -160,7 +160,7 @@ const Home = () => {
 
             <footer className="footer">
                 <div className="about-link">
-                    {/* Removed the external About link since About is now integrated */}
+                    {/* No content since About is now integrated */}
                 </div>
             </footer>
         </div>
