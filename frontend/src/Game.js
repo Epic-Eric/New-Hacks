@@ -104,7 +104,7 @@ const Game = () => {
             const imageData = canvas.toDataURL('image/jpeg').split(',')[1]; // Only get the base64 part
 
             // Send image to the backend
-            fetch('http://127.0.0.1:5000/upload-image', {
+            fetch('http://test.krackle.co/upload-image', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
