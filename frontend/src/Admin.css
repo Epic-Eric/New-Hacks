@@ -1,104 +1,223 @@
-/* Admin.css */
+/* src/Admin.css */
+
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f0f4f8;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
 .admin-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #5c4d98;
-    color: white;
-    font-family: 'Arial', sans-serif;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    overflow-y: auto; /* Allow scrolling if content exceeds viewport */
 }
 
-h1 {
+.admin-title {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.create-game-section, .lobby-info-section {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 30px;
+}
+
+.create-game-section h2, .lobby-info-section h2 {
+    margin-bottom: 25px;
+    color: #5c4d98;
+    text-align: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 20px;
 }
 
-.admin-content {
-    display: flex;
-    width: 80%;
-    justify-content: space-between;
-}
-
-/* Player List with Boxes and Emojis */
-.player-list {
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.player-list h2 {
-    margin-bottom: 10px;
-}
-
-.player-icons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-}
-
-.player-box {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    background-color: #6b5fb5;
-    border-radius: 8px;
-    padding: 6px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.player-emoji {
-    font-size: 1.2rem;
-    margin-right: 6px;
-}
-
-.player-name {
+.form-group label {
     font-size: 1rem;
-    color: white;
+    margin-bottom: 8px;
+    color: #555;
 }
 
-/* Settings and Controls */
-.settings {
-    width: 60%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-label {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    color: white;
-}
-
-input[type="number"], input[type="text"] {
-    padding: 8px;
+.admin-input {
+    padding: 10px 15px;
     font-size: 1rem;
-    width: 60%;
-    margin-left: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-button {
-    padding: 10px 20px;
+.admin-input:focus {
+    border-color: #5c4d98;
+    box-shadow: 0 0 8px rgba(92, 77, 152, 0.2);
+    outline: none;
+}
+
+.btn {
+    padding: 12px 20px;
     font-size: 1rem;
-    cursor: pointer;
-    color: white;
     border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    color: #fff;
+    width: 100%;
+    max-width: 200px;
+    align-self: center;
+    margin-top: 10px;
+}
+
+.create-game-button {
+    background-color: #5c4d98;
+}
+
+.create-game-button:hover {
+    background-color: #483d8b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.copy-link-button {
+    background-color: #007bff;
+    margin-bottom: 20px;
+}
+
+.copy-link-button:hover {
+    background-color: #0069d9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
 .start-game-button {
-    background-color: #48c774;
+    background-color: #28a745;
 }
 
-.invite-button {
-    background-color: #007bff;
+.start-game-button:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
-.home-button {
-    background-color: #ff5c5c;
+.go-home-button {
+    background-color: #6c757d;
+}
+
+.go-home-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.info-message {
+    color: #17a2b8;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.players-section {
+    margin-top: 20px;
+}
+
+.player-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.player-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+.player-item:hover {
+    background-color: #d4d4d4;
+}
+
+.player-emoji {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 20px 10px;
+    }
+
+    .admin-title {
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+
+    .create-game-section, .lobby-info-section {
+        padding: 25px 30px;
+    }
+
+    .btn {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-title {
+        font-size: 1.8rem;
+    }
+
+    .create-game-section, .lobby-info-section {
+        padding: 20px 25px;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .admin-input {
+        font-size: 0.9rem;
+    }
+
+    .player-item {
+        padding: 6px 10px;
+    }
+
+    .player-emoji {
+        font-size: 1rem;
+    }
 }
