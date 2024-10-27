@@ -62,8 +62,7 @@ const Admin = () => {
             };
             socket.emit('createGame', adminSettings);
 
-            // Ensure the admin is only added once
-            setCurrentPlayers([{ id: 'admin', name: adminName }]);
+            
         } else {
             setError('Please provide valid game settings.');
         }
