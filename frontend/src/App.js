@@ -42,7 +42,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="" element={<Game />} /> {/* Route for Game */}
+                <Route path="/game" element={<Game />} /> {/* Route for Game */}
                 {/* Add more routes as needed */}
             </Routes>
         </Router>

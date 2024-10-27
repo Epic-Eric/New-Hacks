@@ -49,7 +49,7 @@ const Home = () => {
     }, [location.search, navigate]);
 
     const handleStart = () => {
-        setError('/game'); // Clear any previous error message
+        setError(''); // Clear any previous error message
         if (playerName && lobbyCode) {
             console.log("Attempting to join lobby:", lobbyCode);
             socket.emit('joinLobby', { lobbyCode, playerName });
