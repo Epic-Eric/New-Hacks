@@ -152,6 +152,16 @@ const Admin = () => {
                     <button className="btn copy-link-button" onClick={handleCopyLink}>
                         Copy Invite Link
                     </button>
+
+                    {/* Video Player Section */}
+                    <div className="video-player-section">
+                        <h3>Game Instructions</h3>
+                        <video width="100%" height="auto" controls>
+                            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+
                     <div className="players-section">
                         <h3>Players Joined:</h3>
                         <ul className="player-list">
@@ -181,4 +191,3 @@ const Admin = () => {
 };
 
 export default Admin;
-
