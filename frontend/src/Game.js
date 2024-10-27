@@ -174,7 +174,7 @@ const Game = () => {
                     </div>
                 </div>
 
-                {/* <div className="main-video-container">
+                { <div className="main-video-container">
                     <div className="video-container">
                         <iframe
                             className="youtube-iframe"
@@ -186,7 +186,7 @@ const Game = () => {
                         ></iframe>
                         <div className="overlay"></div>
                     </div>
-                </div> */}
+                </div> }
 
                 <div className="death-log">
                     <h2>Death Log</h2>
