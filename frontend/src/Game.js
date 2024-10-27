@@ -64,35 +64,55 @@ const Game = () => {
 
         // Ensure the video element is ready before capturing the frame
         if (videoElement && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
-            const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            // const canvas = document.createElement('canvas');
+            // canvas.width = videoElement.videoWidth;
+            // canvas.height = videoElement.videoHeight;
+            // const ctx = canvas.getContext('2d');
+            // ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-            // Convert the canvas to a Blob (image format) to send to the server
-            canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append('image', blob, 'frame.jpg');
+            // // Convert the canvas to a Blob (image format) to send to the server
+            // canvas.toBlob(async (blob) => {
+            //     const formData = new FormData();
+            //     formData.append('image', blob, 'frame.jpg');
 
-                // Send the image to the js server for smile detection
-                try {
-                    const response = await fetch('https://test.krackle.co/upload_image', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const result = await response.json();
-                    console.log('successfully uploaded')
-                    // if (result.smile_detected) {
-                    //     setSmileDetected(true);
-                    //     socket.emit('smile_detected');  // Emit event if a smile is detected
-                    // } else {
-                    //     setSmileDetected(false);
-                    // }
-                } catch (error) {
-                    console.error('Error detecting smile:', error);
-                }
-            }, 'image/jpeg');
+            //     // Send the image to the js server for smile detection
+            //     try {
+            //         const response = await fetch('https://test.krackle.co/upload_image', {
+            //             method: 'POST',
+            //             body: formData
+            //         });
+            //         const result = await response.json();
+            //         console.log('successfully uploaded')
+            //         // if (result.smile_detected) {
+            //         //     setSmileDetected(true);
+            //         //     socket.emit('smile_detected');  // Emit event if a smile is detected
+            //         // } else {
+            //         //     setSmileDetected(false);
+            //         // }
+            //     } catch (error) {
+            //         console.error('Error detecting smile:', error);
+            //     }
+            // }, 'image/jpeg');
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the canvas image to base64 string
+            const imageData = canvas.toDataURL('image/jpeg').split(',')[1]; // Only get the base64 part
+
+            // Send image to the backend
+            fetch('http://127.0.0.1:5000/upload-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(err => console.error(err));
+
+
+
         } else {
             console.log("Video element not ready yet.");
         }

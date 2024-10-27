@@ -52,7 +52,7 @@ const storage = multer.diskStorage({
         if (!fs.existsSync(uploadDirectory)) {
             fs.mkdirSync(uploadDirectory);
         }
-        cb(null, './upload_image');  // Path to save the images
+        cb(null, './uploads');  // Path to save the images
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
