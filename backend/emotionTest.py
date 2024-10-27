@@ -47,7 +47,7 @@ emotion_dict:dict[int, str] = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Hap
 emotion_history: list[float] = []
 # start the webcam feed
 frame_rate: int | float = 5
-model.load_weights('backend/model.h5')
+model.load_weights('model.h5')
 def predict_emotion(frame: np.ndarray) -> list:
     """
     Predicts the emotion from a given frame.
@@ -56,7 +56,7 @@ def predict_emotion(frame: np.ndarray) -> list:
     :type: frame: np.ndarray
     :return: list: A list of predictions for each detected face in the frame.
     """
-    facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
+    facecasc = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
     preds = []
