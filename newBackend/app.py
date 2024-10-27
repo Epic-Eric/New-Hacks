@@ -43,8 +43,7 @@ def upload_image():
         emotion = predict_emotion(image_data)
         print('emotion predicted:')
         print(emotion)
-
-        return jsonify(emotion.tolist()), 200
+        return jsonify(np.array(emotion).flatten().tolist()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
