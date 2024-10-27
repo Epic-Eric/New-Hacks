@@ -3,6 +3,7 @@
 import { io } from 'socket.io-client';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:4001';
+console.log('SERVER_URL:', SERVER_URL); // Add this line for debugging
 
 const socket = io(SERVER_URL, {
     withCredentials: true,
