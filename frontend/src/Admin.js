@@ -61,7 +61,7 @@ const Admin = () => {
                 players
             };
             socket.emit('createGame', adminSettings);
-            setCurrentPlayers(prev => [...prev, adminName]);
+            setCurrentPlayers([{ id: 'admin', name: adminName }]);
         } else {
             setError('Please provide valid game settings.');
         }
