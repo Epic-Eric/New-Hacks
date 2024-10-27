@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import './Admin.css'; // Import the CSS for styling
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import socket from './socket';
 
 const Admin = () => {
@@ -17,6 +17,8 @@ const Admin = () => {
     const [error, setError] = useState('');
 
     const navigate = useNavigate(); // Initialize navigate
+    const [searchParams] = useSearchParams()
+
 
     useEffect(() => {
         // Listen for createGameResponse
@@ -72,7 +74,7 @@ const Admin = () => {
         // Emit 'startGame' event to backend
         socket.emit('startGame', lobbyCode);
         // Navigate to game screen
-        navigate('/game', { state: { timer: parseInt(timer), rounds: parseInt(rounds), players: currentPlayers.map(p => p.name) } });
+        navigate('/game?name=' + searchParams.get('name'), { state: { timer: parseInt(timer), rounds: parseInt(rounds), players: currentPlayers.map(p => p.name) } });
     };
 
     const handleCopyLink = () => {

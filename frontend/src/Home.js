@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import socket from './socket';
 import Loading from './Loading';
-import './Home.css'; // Ensure the path is correct based on your project structure
+import './Home.css';
 
 const Home = () => {
     const [playerName, setPlayerName] = useState('');
@@ -21,33 +21,39 @@ const Home = () => {
             setLobbyCode(lobby);
         }
 
-        // Socket event listeners
+        // Listen for successful join
         socket.on('playerJoined', (player) => {
             console.log(`Joined lobby as ${player.name}`);
+            // No need to setIsLoading(true) here since it's already set when attempting to join
         });
 
+        // Listen for lobby not found
         socket.on('lobbyNotFound', () => {
             setError('Lobby not found. Please check the code and try again.');
             setIsLoading(false);
         });
 
+        // Listen for joinLobbyResponse
         socket.on('joinLobbyResponse', ({ success, lobbyCode, message }) => {
             if (success) {
                 console.log(`Successfully joined lobby: ${lobbyCode}`);
+                // Optionally, you can update UI or navigate
             } else {
                 setError(message || 'Failed to join lobby.');
                 setIsLoading(false);
             }
         });
 
+        // Listen for game start
         socket.on('gameStarted', (gameSettings) => {
             console.log("Received 'gameStarted' event:", gameSettings);
             setIsLoading(false);
-            navigate('/game', { state: { ...gameSettings } });
+            navigate('/game?name=' + playerName, { state: { ...gameSettings } });
         });
 
-        // Cleanup listeners
+        // Cleanup listeners on unmount
         return () => {
+            console.log("Cleaning up 'playerJoined', 'lobbyNotFound', 'joinLobbyResponse', and 'gameStarted' listeners");
             socket.off('playerJoined');
             socket.off('lobbyNotFound');
             socket.off('joinLobbyResponse');
@@ -56,112 +62,64 @@ const Home = () => {
     }, [location.search, navigate]);
 
     const handleStart = () => {
-        setError('');
+        setError(''); // Clear any previous error message
         if (playerName && lobbyCode) {
             console.log("Attempting to join lobby:", lobbyCode);
             socket.emit('joinLobby', { lobbyCode, playerName });
-            setIsLoading(true);
+            setIsLoading(true); // Show loading screen while attempting to join
         } else {
             setError('Please enter both your name and lobby code.');
         }
     };
 
     const handleCreateGame = () => {
-        navigate('/admin');
+        navigate('/admin?name=' + playerName); // Navigate to admin screen for game creation
     };
 
+    // Render loading screen if in loading state
     if (isLoading) {
         return <Loading />;
     }
 
     return (
         <div className="home-container">
-            {/* Sidebar */}
-            <aside className="sidebar">
-                <h1 className="game-title">krackle.co <span className="emoji">😄</span></h1>
-            </aside>
-
-            {/* Main Content */}
-            <main className="main-content">
-                <section className="form-section">
-                    <div className="form-group">
-                        <label htmlFor="playerName" className="form-label">Name:</label>
-                        <input
-                            type="text"
-                            id="playerName"
-                            className="form-input"
-                            placeholder="Enter your name"
-                            value={playerName}
-                            onChange={(e) => setPlayerName(e.target.value)}
-                            aria-label="Player Name"
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="lobbyCode" className="form-label">Lobby Code:</label>
-                        <input
-                            type="text"
-                            id="lobbyCode"
-                            className="form-input"
-                            placeholder="Enter lobby code"
-                            value={lobbyCode}
-                            onChange={(e) => setLobbyCode(e.target.value)}
-                            aria-label="Lobby Code"
-                        />
-                    </div>
-                    {error && <p className="error-message">{error}</p>}
-                    <div className="button-group">
-                        <button className="btn btn-primary" onClick={handleStart} aria-label="Play">
-                            Play!
-                        </button>
-                        <button className="btn btn-secondary" onClick={handleCreateGame} aria-label="Create a New Game">
-                            Create a New Game
-                        </button>
-                    </div>
-                </section>
-
-                <section className="about-section">
-                    <h2>Project for NewHacks 2024</h2>
-                    <p>
-                        This project was developed for NewHacks 2024, aiming to create an engaging and fun experience for users to compete and enjoy a unique challenge.
-                    </p>
-                    <h3>Our Team</h3>
-                    <div className="team-members">
-                        <div className="member">
-                            <h4>Eric</h4>
-                            <p>Frontend Engineer</p>
-                        </div>
-                        <div className="member">
-                            <h4>Hayson</h4>
-                            <p>Backend Engineer</p>
-                        </div>
-                        <div className="member">
-                            <h4>Jacky</h4>
-                            <p>Frontend Designer</p>
-                        </div>
-                        <div className="member">
-                            <h4>Paul</h4>
-                            <p>Backend Engineer</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="rules-section">
-                    <h2>Rules</h2>
-                    <ol className="rules-list">
-                        <li>Watch a Funny Reel.</li>
-                        <li>Try not to Laugh.</li>
-                        <li>Earn Points and Compete with your friends.</li>
-                    </ol>
-                </section>
-            </main>
-
-            {/* Footer */}
-            <footer className="footer">
-                {/* Optional footer content can go here */}
-            </footer>
+            <h1 className="game-title">krackle.co <span className="emoji">😄</span></h1>
+            <div className="name-entry">
+                <label className="name-label">
+                    Name:
+                    <input
+                        type="text"
+                        className="name-input"
+                        placeholder="Enter your name"
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                    />
+                </label>
+                <label className="lobby-label">
+                    Lobby Code:
+                    <input
+                        type="text"
+                        className="lobby-input"
+                        placeholder="Enter lobby code"
+                        value={lobbyCode}
+                        onChange={(e) => setLobbyCode(e.target.value)}
+                    />
+                </label>
+                {error && <p className="error-message">{error}</p>}
+            </div>
+            <div className="button-container">
+                <button className="play-button" onClick={handleStart}>
+                    Play!
+                </button>
+                <button className="create-game-button" onClick={handleCreateGame}>
+                    Create a New Game
+                </button>
+            </div>
+            <div className="about-link">
+                <a href="/about">About</a>
+            </div>
         </div>
     );
-
 };
 
 export default Home;

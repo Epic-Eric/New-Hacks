@@ -2,16 +2,11 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import socket from './socket';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import './Game.css';
 
-const URL = [
-    'https://www.youtube.com/embed/qjckWVDjxoI?autoplay=1',
-    'https://www.youtube.com/embed/GPIP6Q6WOfk?autoplay=1',
-    'https://www.youtube.com/embed/thY3TbclJ2c?autoplay=1',
-    'https://www.youtube.com/embed/p-d87-zmtbc?autoplay=1',
-    'https://www.youtube.com/embed/z22jKvMYHOY?autoplay=1'
-];
+// Using a publicly hosted sample video for demonstration
+// const MAIN_VIDEO_URL = 'https://www.youtube.com/shorts/qjckWVDjxoI';
 
 const emojis = ['😀', '😆', '😅', '😂', '🤣', '😊', '😍', '😎', '🤩', '🥳', '😜', '🤪'];
 
@@ -24,52 +19,18 @@ const Game = () => {
     const [deathLog, setDeathLog] = useState([]);
     const [players, setPlayers] = useState(initialPlayers);
     const [smileDetected, setSmileDetected] = useState(false);
-    const [webcamError, setWebcamError] = useState(null);
-    const [currentVideoUrl, setCurrentVideoUrl] = useState(URL[Math.floor(Math.random() * URL.length)]);
+    const [webcamError, setWebcamError] = useState(null);  // State to track webcam errors
+    const [searchParams] = useSearchParams();
+    const name = searchParams.get('name');
 
-    const videoRef = useRef(null);
-
-    // Function to pick a new random video URL that’s different from the current one
-    const changeVideo = () => {
-        let newVideoUrl;
-        do {
-            newVideoUrl = URL[Math.floor(Math.random() * URL.length)];
-        } while (newVideoUrl === currentVideoUrl);
-        setCurrentVideoUrl(newVideoUrl);
-    };
+    const videoRef = useRef(null);  // Reference to the webcam video element
 
     useEffect(() => {
-        // Countdown timer effect
-        if (timer > 0) {
-            const countdown = setInterval(() => setTimer((prev) => Math.max(prev - 1, 0)), 1000);
-            return () => clearInterval(countdown);
-        } else {
-            // When timer hits 0, switch video and reset the timer
-            changeVideo();
-            setTimer(initialTimer);
-            setRound((prevRound) => prevRound > 1 ? prevRound - 1 : prevRound);
-        }
-    }, [timer, initialTimer, round]);
-
-
-    useEffect(() => {
-        // Countdown timer effect
-        if (timer > 0) {
-            const countdown = setInterval(() => setTimer((prev) => Math.max(prev - 1, 0)), 1000);
-            return () => clearInterval(countdown);
-        } else {
-            // When timer hits 0, switch video and reset the timer
-            changeVideo();
-            setTimer(initialTimer);
-            setRound((prevRound) => prevRound > 1 ? prevRound - 1 : prevRound);
-        }
-    }, [timer, initialTimer, round]);
-
-    useEffect(() => {
+        console.log(socket.id);
         // Listen for players joining
         socket.on('playerJoined', (player) => {
             setPlayers(prev => [...prev, player]);
-            console.log(`Player joined: ${player.name}`);
+            console.log(`Game display: player joined: ${player.name}`);
         });
 
         // Listen for players leaving
@@ -85,15 +46,26 @@ const Game = () => {
         };
     }, []);
 
+    // Countdown timer effect
+    useEffect(() => {
+        if (timer > 0) {
+            const countdown = setInterval(() => setTimer((prev) => Math.max(prev - 1, 0)), 1000);
+            return () => clearInterval(countdown);
+        } else if (round > 1) {
+            setTimer(initialTimer);
+            setRound((prevRound) => prevRound - 1);
+        }
+    }, [timer, round, initialTimer]);
+
     const handlePlayerDeath = (playerName) => {
         setDeathLog((prevLog) => [...prevLog, `${playerName} has died.`]);
     };
 
     // Capture webcam frame and send it to Python server
     const captureAndSendFrame = async () => {
-        const videoElement = videoRef.current;
-        console.log(videoElement);
+        const videoElement = videoRef.current;  // Get the video element reference
 
+        // Ensure the video element is ready before capturing the frame
         if (videoElement && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
             const canvas = document.createElement('canvas');
             canvas.width = videoElement.videoWidth;
@@ -136,10 +108,11 @@ const Game = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ image: imageData })
+                body: JSON.stringify({ image: imageData, name: name })
             })
             .then(response => response.json())
             .then(data => console.log(data))
+            .then(data => console.log('succesful'))
             .catch(err => console.error(err));
 
 
@@ -151,6 +124,7 @@ const Game = () => {
 
     // Set up webcam capture and send frames at intervals
     useEffect(() => {
+        // Start the webcam
         const startWebcam = async () => {
             try {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -159,9 +133,18 @@ const Game = () => {
 
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
-                const videoElement = videoRef.current;
+                // Debug the stream object
+                console.log('Stream object:', stream);
+
+                const videoElement = videoRef.current;  // Get the video element reference
+
                 if (videoElement) {
+                    // Debug the video element before assignment
+                    console.log('Video element:', videoElement);
+
                     videoElement.srcObject = stream;
+
+                    // Ensure the video is ready before capturing frames
                     videoElement.addEventListener('loadedmetadata', () => {
                         console.log("Webcam stream is ready.");
                     });
@@ -170,16 +153,19 @@ const Game = () => {
                 }
             } catch (error) {
                 console.error('Error accessing webcam:', error);
-                setWebcamError(error.message);
+                setWebcamError(error.message);  // Capture and display the webcam error
             }
         };
 
         startWebcam();
 
+        // Capture frames every second
         const intervalId = setInterval(captureAndSendFrame, 1000);
 
+        // Cleanup the interval and stop webcam on component unmount
         return () => {
             clearInterval(intervalId);
+            // Stop all video tracks to release the webcam
             if (videoRef.current && videoRef.current.srcObject) {
                 videoRef.current.srcObject.getTracks().forEach(track => track.stop());
             }
@@ -194,7 +180,7 @@ const Game = () => {
                     <p>Timer: {timer}s</p>
                     <p>Round: {round}</p>
                     <p>{smileDetected ? 'Smile detected!' : 'No smile detected.'}</p>
-                    {webcamError && <p className="error-message">{webcamError}</p>}
+                    {webcamError && <p className="error-message">{webcamError}</p>}  {/* Display webcam error if any */}
                 </div>
             </div>
 
@@ -211,19 +197,7 @@ const Game = () => {
                     </div>
                 </div>
 
-                <div className="main-video-container">
-                    <div className="video-container">
-                        <iframe
-                            className="youtube-iframe"
-                            src={currentVideoUrl} // Added autoplay=1 here
-                            title="YouTube video player"
-                            frameBorder="0"
-                            allowFullScreen={false}
-                            allow="autoplay; encrypted-media;"
-                        ></iframe>
-                        <div className="overlay"></div>
-                    </div>
-                </div>
+
 
                 <div className="death-log">
                     <h2>Death Log</h2>
@@ -245,11 +219,12 @@ const Game = () => {
                 id="webcam" 
                 autoPlay 
                 playsInline 
-                muted
-                className="webcam-video"
+                muted  // Muted to comply with autoplay policies if needed
+                className="webcam-video"  // Added className for styling
             ></video>
         </div>
     );
+
 };
 
 export default Game;

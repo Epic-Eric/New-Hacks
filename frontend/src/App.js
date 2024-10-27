@@ -8,7 +8,7 @@ import Admin from './Admin';
 import Game from './Game'; // Import the Game component
 import './App.css';
 
-const socket = io('http://localhost:4001'); // Connect to the WebSocket server
+const socket = io('https://www.krackle.co'); // Connect to the WebSocket server
 
 function App() {
     useEffect(() => {

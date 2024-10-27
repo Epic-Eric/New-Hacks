@@ -18,7 +18,7 @@ from flask_socketio import SocketIO
 import base64
 import cv2
 import numpy as np
-from emotionTest import predict_emotion  # Import your model function
+from newBackend.emotionTest import predict_emotion  # Import your model function
 
 app = Flask(__name__)
 

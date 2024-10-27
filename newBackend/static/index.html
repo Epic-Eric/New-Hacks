@@ -28,10 +28,12 @@
         document.getElementById('capture').addEventListener('click', function() {
             // Draw the video frame to the canvas
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            console.log(canvas.toDataURL('image/jpeg'));
+            console.log(canvas.toDataURL('image/jpeg').split(',')[1]);
 
             // Convert the canvas image to base64 string
             const imageData = canvas.toDataURL('image/jpeg').split(',')[1]; // Only get the base64 part
-
+            console.log(imageData);
             // Send image to the backend
             fetch('http://127.0.0.1:5000/upload-image', {
                 method: 'POST',

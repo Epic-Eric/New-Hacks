@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const crypto = require('crypto');
+require('dotenv').config()
 
 
 
@@ -19,7 +20,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Define allowed origins
-const allowedOrigins = ['https://krackle.co', 'https://www.krackle.co', 'https://test.krackle.co'];
+const allowedOrigins = ['https://krackle.co', 'https://www.krackle.co', 'https://test.krackle.co', 'localhost:3000'];
 
 
 
@@ -148,10 +149,10 @@ io.on('connection', (socket) => {
     });
 });
 
-// const PORT = process.env.PORT;
-// server.listen(PORT, () => {
-//     console.log(`Server is running on port ${PORT}`);
-// }); 
+const PORT = process.env.PORT;
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+}); 
 
 
 
