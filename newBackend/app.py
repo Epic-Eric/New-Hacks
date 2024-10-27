@@ -11,9 +11,12 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for cross-origin requests
 
 
-@app.route('/upload-image', methods=['POST'])
+@app.route('/upload-image', methods=['POST', 'OPTIONS'])
+@cross_origin()
 def upload_image():
     try:
+        if request.method == "OPTIONS":
+            return _build_cors_preflight_response()  # Preflight request handling
         # Get image data from the request
         image_data = request.json.get('image')
         name = request.json.get('name')
@@ -44,6 +47,14 @@ def upload_image():
         return jsonify(emotion), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Helper function to build CORS preflight response
+def _build_cors_preflight_response():
+    response = jsonify({'message': 'CORS preflight successful'})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
