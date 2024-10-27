@@ -128,19 +128,19 @@ const Home = () => {
                     <div className="team-members">
                         <div className="member">
                             <h4>Eric</h4>
-                            <p>Lead Developer</p>
+                            <p>Frontend Engineer</p>
                         </div>
                         <div className="member">
                             <h4>Hayson</h4>
-                            <p>UI/UX Designer</p>
-                        </div>
-                        <div className="member">
-                            <h4>Jacky</h4>
                             <p>Backend Engineer</p>
                         </div>
                         <div className="member">
+                            <h4>Jacky</h4>
+                            <p>Frontend Designer</p>
+                        </div>
+                        <div className="member">
                             <h4>Paul</h4>
-                            <p>Project Manager</p>
+                            <p>Backend Engineer</p>
                         </div>
                     </div>
                 </section>
