@@ -7,17 +7,24 @@ const cors = require('cors');
 const crypto = require('crypto');
 
 
+
+
 //new
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
+// new
 
 const app = express();
 const server = http.createServer(app);
 
 // Define allowed origins
-const allowedOrigins = ['https://krackle.co', 'https://www.krackle.co'];
+const allowedOrigins = ['https://krackle.co', 'https://www.krackle.co', 'https://test.krackle.co'];
+
+
+
+
+
 
 // CORS Configuration
 app.use(cors({
@@ -37,41 +44,30 @@ const io = new Server(server, {
 
 
 
-
-
-//new 
-
-const uploadDir = path.join(__dirname, '../frontend/public/uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
+//new
+// Configure multer for image upload handling
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir);  // Save files to 'public/uploads'
+        cb(null, './uploads');  // Path to save the images
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);  // Timestamp to avoid name collisions
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));  // Save with unique name
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-// Route for uploading images
+// Handle image upload route
 app.post('/upload_image', upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
-    }
-    
-    const fileUrl = `/uploads/${req.file.filename}`;
-    res.json({ message: 'Image uploaded successfully', fileUrl });
+    console.log('Image received:', req.file);  // Log the image information
+    res.json({ success: true, message: 'Image received successfully!', file: req.file });
 });
-
-// Serve static files from the 'public' folder
-app.use(express.static(path.join(__dirname, '../frontend/public/uploads')));
+//new
 
 
-//new ends
+
+
 
 
 
@@ -184,7 +180,10 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = process.env.PORT || 4001;
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// const PORT = process.env.PORT;
+// server.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}`);
+// }); 
+
+
+
