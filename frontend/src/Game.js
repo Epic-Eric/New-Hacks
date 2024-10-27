@@ -114,6 +114,7 @@ const Game = () => {
             .then(response => response.json())
             .then(data => {
                 console.log(data);
+                console.log(data[0]);
                 if(data[0][3] + data[0][6] > 0){
                     navigate('/lost');
                 }
