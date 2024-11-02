@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Game with Webcam</title>
+</head>
+<body>
+    <h1>Game Interface</h1>
+
+    <!-- Video element to display webcam feed -->
+    <h2>Webcam Feed</h2>
+    <video id="webcam" autoplay playsinline></video>
+
+    <!-- Button to start the WebSocket connection -->
+    <button id="start" onclick="startWebSocket()">Start WebSocket</button>
+
+    <!-- Display server messages here -->
+    <p id="message">Waiting for server response...</p>
+
+    <script>
+        let socket;
+
+        // Start the webcam
+        async function startWebcam() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoElement = document.getElementById('webcam');
+                videoElement.srcObject = stream;
+                console.log("Webcam started.");
+            } catch (error) {
+                console.error("Error accessing webcam:", error);
+                alert("Unable to access webcam. Please allow webcam access.");
+            }
+        }
+
+        // Capture a frame from the video element (webcam feed)
+        function captureFrame(video) {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            return canvas.toDataURL('image/png'); // Base64-encoded image
+        }
+
+        // Start WebSocket connection and send webcam frames every 0.5 seconds
+        function startWebSocket() {
+            const video = document.getElementById('webcam');
+            socket = new WebSocket("ws://localhost:8000/ws");
+
+            socket.onopen = function(event) {
+                console.log("WebSocket connection opened.");
+
+                // Send webcam frames every 0.5 seconds
+                setInterval(() => {
+                    const frame = captureFrame(video);
+                    socket.send(frame); // Send base64 image data
+                    console.log("Frame sent to server.");
+                }, 500); // Send every 0.5 seconds
+            };
+
+            socket.onmessage = function(event) {
+                console.log("Message from server:", event.data);
+                // Display server message
+                document.getElementById('message').innerText = "Server: " + event.data;
+            };
+
+            socket.onclose = function(event) {
+                console.log("WebSocket connection closed.");
+                document.getElementById('message').innerText = "WebSocket connection closed.";
+            };
+        }
+
+        // Initialize the webcam on page load
+        window.onload = function() {
+            startWebcam();
+        };
+    </script>
+</body>
+</html>
