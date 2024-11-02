@@ -94,58 +94,9 @@ const Game = () => {
             canvas.height = videoElement.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg');
 
-            // // Convert the canvas to a Blob (image format) to send to the server
-            // canvas.toBlob(async (blob) => {
-            //     const formData = new FormData();
-            //     formData.append('image', blob, 'frame.jpg');
-
-            //     // Send the image to the js server for smile detection
-            //     try {
-            //         const response = await fetch('https://test.krackle.co/upload_image', {
-            //             method: 'POST',
-            //             body: formData
-            //         });
-            //         const result = await response.json();
-            //         console.log('successfully uploaded')
-            //         // if (result.smile_detected) {
-            //         //     setSmileDetected(true);
-            //         //     socket.emit('smile_detected');  // Emit event if a smile is detected
-            //         // } else {
-            //         //     setSmileDetected(false);
-            //         // }
-            //     } catch (error) {
-            //         console.error('Error detecting smile:', error);
-            //     }
-            // }, 'image/jpeg');
-
-            // context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Convert the canvas image to base64 string
-            const imageData = canvas.toDataURL('image/jpeg').split(',')[1]; // Only get the base64 part
-
-            // Send image to the backend
-            fetch('http://127.0.0.1:5000/upload-image', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ image: imageData, name: name })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                console.log(data[0]);
-                if(data[3] + data[6] > 0.5){
-                    navigate('/lost');
-                }
-                // if(Math.random() < 0.1){
-                //     navigate('/lost');
-                // }
-            })
-            .catch(err => console.error(err));
-
-
+            socket.emit('webcam_data', { image: imageData });
         } else {
             console.log("Video element not ready yet.");
         }
@@ -191,6 +142,15 @@ const Game = () => {
         // Capture frames every second
         const intervalId = setInterval(captureAndSendFrame, 1000);
 
+
+        socket.on('webcam_response', (data) => {
+            console.log('data message', data.message);
+            console.log('data', data)
+            if (data.message[3] + data.message[6] > 0.8) {
+                console.log('smile detected');
+                navigate('/lost');
+            }
+        });
         // Cleanup the interval and stop webcam on component unmount
         return () => {
             clearInterval(intervalId);
