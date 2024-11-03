@@ -13,6 +13,7 @@ const Home = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const [isSpinning, setIsSpinning] = useState(false);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -76,6 +77,13 @@ const Home = () => {
         navigate('/admin?name=' + playerName); // Navigate to admin screen for game creation
     };
 
+    const handleEmojiClick = () => {
+        if (!isSpinning) {
+            setIsSpinning(true);
+            setTimeout(() => setIsSpinning(false), 700)
+        }
+    }
+
     // Render loading screen if in loading state
     if (isLoading) {
         return <Loading />;
@@ -83,7 +91,15 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            <h1 className="game-title">krackle.co <span className="emoji">😄</span></h1>
+            <div className="title-container">
+                <h1 className="game-title">krackle.co</h1>
+                <span 
+                    className={`title-emoji ${isSpinning ? 'spinning' : ''}`} 
+                    onClick={handleEmojiClick}
+                >
+                    😄
+                </span>
+            </div>
             <div className="name-entry">
                 <label className="name-label">
                     Name:

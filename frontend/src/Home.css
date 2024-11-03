@@ -1,95 +1,166 @@
-/* Home.css */
+/* Keep the existing animations */
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes emojiSpin {
+    0% {
+        transform: scale(1.6) rotate(0deg);
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        transform: scale(2.4) rotate(180deg);
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+    }
+    100% {
+        transform: scale(1.6) rotate(360deg);
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+    }
+}
 
 .home-container {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background-color: #5c4d98;
-    color: white;
-    font-family: 'Arial', sans-serif;
+    padding: 2rem;
+    background: linear-gradient(
+        -45deg, 
+        #4834d4,    /* Darker purple */
+        #686de0,    /* Bright purple-blue */
+        #be2edd,    /* Vibrant pink-purple */
+        #ff4757
+    );
+    background-size: 300% 300%;
+    animation: gradientAnimation 8s ease infinite;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
 }
 
+/* Flex center the title container */
+.title-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem; /* Adjusts spacing from the name-entry */
+}
+
+/* Center the title */
 .game-title {
-    font-size: 100rem; /* Significantly larger font size for title */
-    margin-bottom: 30px;
+    scale: 2;
     color: white;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 4rem;
+    margin: 0;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
 }
 
-.emoji {
-    font-size: 7rem; /* Significantly larger font size for emoji */
-    margin-left: 20px;
+/* Position the emoji independently */
+.title-emoji {
+    position: absolute;
+    right: -8rem; /* Adjust to move the emoji further right */
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+    transform-origin: center center;
+    bottom: -0.45rem;
+    scale: 1.6;
 }
 
+.title-emoji.spinning {
+    animation: emojiSpin 0.7s linear;
+}
+
+/* Keep the rest of your styles */
 .name-entry {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-}
-
-.name-label {
-    font-size: 1.2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.name-input {
-    padding: 10px;
-    font-size: 1.2rem;
-    margin-top: 5px;
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     width: 100%;
-    max-width: 300px;
-    border: none;
-    border-radius: 4px;
-    text-align: center;
+    max-width: 400px;
+    margin-bottom: 1.5rem;
+}
+
+.name-label, .lobby-label {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.name-input, .lobby-input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    border: 2px solid #6c5ce7;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.name-input:focus, .lobby-input:focus {
+    outline: none;
+    border-color: #a363d9;
 }
 
 .button-container {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-    width: 100%;
-    max-width: 300px;
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
-.play-button,
-.create-game-button {
-    padding: 12px;
+.play-button, .create-game-button {
+    padding: 0.8rem 2rem;
     font-size: 1.2rem;
-    cursor: pointer;
-    color: white;
     border: none;
-    border-radius: 4px;
-    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 .play-button {
-    background-color: #48c774;
+    background-color: #00b894;
+    color: white;
 }
 
 .create-game-button {
-    background-color: #007bff;
+    background-color: #0984e3;
+    color: white;
+}
+
+.play-button:hover, .create-game-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.error-message {
+    color: #d63031;
+    margin-top: 0.5rem;
+    text-align: center;
 }
 
 .about-link {
-    margin-top: 20px;
-    font-size: 1rem;
-    text-align: center;
+    margin-top: 2rem;
 }
 
 .about-link a {
     color: white;
     text-decoration: none;
+    font-size: 1.1rem;
+    transition: opacity 0.2s ease;
 }
 
 .about-link a:hover {
-    text-decoration: underline;
+    opacity: 0.8;
 }
