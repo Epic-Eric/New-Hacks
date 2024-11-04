@@ -7,6 +7,7 @@ import numpy as np
 from io import BytesIO
 from PIL import Image
 from emotionTest import predict_emotion
+import uvicorn
 
 # Load environment variables from .env file
 
@@ -164,5 +165,4 @@ async def webcam_data(sid, data):
 
 # Run the FastAPI app
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)  # Running on port 8001, as port 8000 is taken by npm start
