@@ -2,59 +2,51 @@ import time
 import numpy as np
 import argparse
 import cv2
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Flatten
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.layers import MaxPooling2D
+import cv2
+import numpy as np
+import argparse
 import os
 import matplotlib.pyplot as plt
-os.environ['TF_CPP_MIN_LOG_LEVEL']: str = '2'
+from tflite_runtime.interpreter import Interpreter
+# Suppress unnecessary logging
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 class Colors:
     RED = '\033[91m'
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
     RESET = '\033[0m'
-# command line argument
+
+# Command line argument
 ap = argparse.ArgumentParser()
-ap.add_argument("--mode",help="train/display")
+ap.add_argument("--mode", help="train/display")
 a = ap.parse_args()
 mode = a.mode
-# Create the model
-model = Sequential()
 
-model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(48,48,1)))
-model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+# Initialize the TFLite interpreter
+interpreter = Interpreter(model_path="model.tflite")
+interpreter.allocate_tensors()
 
-model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+# Get input and output details
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
-model.add(Flatten())
-model.add(Dense(1024, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(7, activation='softmax'))
-
-
-
-# prevents openCL usage and unnecessary logging messages
+# Prevents OpenCL usage and unnecessary logging messages
 cv2.ocl.setUseOpenCL(False)
-# dictionary which assigns each label an emotion (alphabetical order)
-emotion_dict:dict[int, str] = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
-emotion_history: list[float] = []
-# start the webcam feed
-frame_rate: int | float = 5
-model.load_weights('model.h5')
+
+# Dictionary which assigns each label an emotion (alphabetical order)
+emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
+emotion_history = []
+
+# Start the webcam feed
+frame_rate = 5
 
 def predict_emotion(frame: np.ndarray) -> list:
     """
     Predicts the emotion from a given frame.
 
-    :param: frame: The input frame from the webcam.
-    :type: frame: np.ndarray
+    :param frame: The input frame from the webcam.
+    :type frame: np.ndarray
     :return: list: A list of predictions for each detected face in the frame.
     """
     facecasc = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
@@ -65,13 +57,19 @@ def predict_emotion(frame: np.ndarray) -> list:
         cv2.rectangle(frame, (x, y-50), (x+w, y+h+10), (255, 0, 0), 2)
         roi_gray = gray[y:y + h, x:x + w]
         cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
-        prediction = model.predict(cropped_img,verbose = 0)
-        preds.append(prediction[0])
+        cropped_img = cropped_img.astype(np.float32)  # Ensure type matches model input
+
+        # Set the tensor for the input data
+        interpreter.set_tensor(input_details[0]['index'], cropped_img)
+        interpreter.invoke()
+
+        # Get the output and determine the emotion
+        prediction = interpreter.get_tensor(output_details[0]['index'])[0]
+        preds.append(prediction)
         maxindex = int(np.argmax(prediction))
         cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
     return preds
-# if the model results the client is happy or surprised in the last n seconds for 1/2 of the time, then the client loses
-""" 
+
 n: int | float = 3
 # grace period for the client to be happy or surprised to adjust to the game
 happySurpriseLast: list[float] = list()
@@ -110,11 +108,11 @@ while time.time() - start_Time < n or len(happySurpriseLast) >= n * frame_rate /
         break
 # wait for other player to adjust their face
 
-""" 
+
 
 # TODO: Implement the game phase where the client has to keep a neutral face for n seconds.
 
-"""
+
 
 GamePhase = "Game"
 print(f"{Colors.GREEN}✅ Face Adjusted, Game Start! {Colors.RESET}")
@@ -164,4 +162,3 @@ cv2.destroyAllWindows()
 for i in emotion_history:
     plt.scatter(i, 0)
 plt.show()
-"""
