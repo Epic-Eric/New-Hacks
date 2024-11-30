@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter
-
+from emotionTest import predict_from_face
+# TODO: significant color change is also detected, which is not what we want
 # Initialize the webcam
 cap = cv2.VideoCapture(0)
 
@@ -82,7 +83,8 @@ while True:
     if len(faces) > 0:
         # Blur the background but keep the largest face sharp
         frame_with_blurred_background, largest_face = blur_background(frame, faces)
-
+        # put "green tick" on bottom right corner
+        cv2.putText(frame_with_blurred_background, "V face detected", (frame_with_blurred_background.shape[1] - 100, frame_with_blurred_background.shape[0] - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         # Resize the largest face to a consistent size (e.g., 200x200)
         x, y, w, h = largest_face
         face = gray[y:y + h, x:x + w]
@@ -118,8 +120,9 @@ while True:
 
             # Detect peaks in the smoothed rmse signal
             peaks, _ = find_peaks(smoothed_rmse, height=rmse_threshold)
-
-            if len(peaks) > 0:
+            p = predict_from_face(np.expand_dims(np.expand_dims(cv2.resize(resized_face, (48, 48)), -1), 0))
+            cv2.putText(frame_with_blurred_background, p, (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+            if len(peaks) > 0 and p != "Neutral" and p != "Angry":
                 detection_history.append(1)
                 cv2.putText(frame_with_blurred_background, "Significant change detected!", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             else:
@@ -134,6 +137,7 @@ while True:
                         (0, 255, 0), 2)
     else:
         frame_with_blurred_background = frame  # If no face is detected, just show the original frame
+        cv2.putText(frame_with_blurred_background, "X No face", (frame_with_blurred_background.shape[1] - 100, frame_with_blurred_background.shape[0] - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     # Display the frame with the blurred background
     cv2.imshow("Webcam Feed", frame_with_blurred_background)
