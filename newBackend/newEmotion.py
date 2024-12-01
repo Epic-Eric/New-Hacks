@@ -1,29 +1,19 @@
+from typing import Optional
+
 import cv2
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter
-from emotionTest import predict_from_face
-# TODO: significant color change is also detected, which is not what we want
+
+# COLLECT LAST ~40 FRAMES
+
 # Initialize the webcam
 cap = cv2.VideoCapture(0)
 
-# Load the pre-trained Haar Cascade classifier for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Store the last 'n' Eigenface projections
-n = 10  # Default number of frames to track
-last_n_projections = []
-num_components = 50  # Number of components for PCA
-
 # Parameters for peak detection and Savitzky-Golay filter
-rmse_threshold = 0.005  # Threshold to detect significant change in rmse
-window_length = 11  # Window length for Savitzky-Golay filter
-polyorder = 2  # Polynomial order for Savitzky-Golay filter
-recent_peak_frames = 4 * n  # Track recent peaks in the last 4 * n frames
-recent_peaks = []  # List to track the frame indices where peaks occurred
-
-main_history = []  # Store the main history of rmse values
-smoothed_rmse_history = []  # Store the smoothed rmse values
-detection_history = []  # Store the detection history
+THRESHOLD = 0.005  # Threshold to detect significant change in rmse
+POLYORDER = 2  # Polynomial order for Savitzky-Golay filter
 
 # Function to compute the Eigenfaces (PCA)
 def compute_eigenfaces(images):
@@ -41,11 +31,9 @@ def project_to_eigenfaces(image, mean_face, eigen_vectors):
     return weights
 
 
-# Initialize a dummy image for Eigenfaces computation (For demonstration purposes)
 # Normally, you would gather a set of training images.
 dummy_face = np.zeros((200, 200), dtype=np.uint8)
 mean_face, eigen_vectors = compute_eigenfaces([dummy_face])  # Replace this with your actual training images
-
 
 # Function to blur the background while keeping the largest face sharp
 def blur_background(frame, faces):
@@ -64,100 +52,100 @@ def blur_background(frame, faces):
 
     return blurred_frame, largest_face
 
+def rmse_peak_detection(currMSE: float, rmseHistory: list[float], threshold: float = THRESHOLD, polyorder: int = POLYORDER) -> bool:
+    """
+    Function to detect significant changes in the face appearance based on the rMSE signal
 
-# Start the frame capture loop
-rmse_history = []  # Store rmse values
-frame_count = 0  # To count frames for recent peak tracking
+    :param currMSE: the current rMSE value
+    :param rmseHistory: the history of rMSE values
+    :param threshold: the threshold for peak detection
+    :param polyorder: the polynomial order for the Savitzky-Golay filter
+    :return: bool: True if a significant change is detected, False otherwise
+    """
+    rmseHistory.append(currMSE)
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+    if len(rmseHistory) < 10:
+        return False
 
+    smoothed_rmse = savgol_filter(rmseHistory, len(rmseHistory), polyorder)
+    peaks, _ = find_peaks(smoothed_rmse, height=threshold)
+
+    if len(peaks) > 0:
+        return True
+
+    return False
+
+def get_eigenFace_mse(frame: np.ndarray, history: list[tuple[float, tuple[Optional[float], list[float]]]]) -> Optional[tuple[tuple[Optional[float], list[float]], bool]]:
+    """
+    Function to compute the Eigenfaces and the rMSE, and detect significant changes in the face appearance. Main trigger from the server
+
+    :param frame: np.ndarray: The frame from the webcam
+    :param history: list[tuple[float, tuple[float, list[float]]]: The history of the rMSE and the projections
+            [(t0, (None, proj0)), (t1, (rmse1, proj1)), ...]
+    :return: tuple[tuple[float, list[float]], bool]: The MSE and the detection flag or None if no face is detected
+
+            result = get_eigenFace_mse(frame, currTime, history)
+
+            assert result is not None # Please handle no face detected
+
+            rmse: float, proj: list[float] = result[0]
+            isDetected: bool = result[1]
+
+            time = (ur way of getting time)
+            history.append( (time, (rmse, proj))) )
+            # save history
+            # react to isDetected
+    """
     # Convert the frame to grayscale for face detection
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Detect faces in the frame
     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
+    rmse_history = [rmse if (rmse:= i[1][0]) is not None else 0 for i in history]
+    projection_history = [i[1][1] for i in history]
+
+    ret = (0.0, [])
+    isDetected = False
+
     if len(faces) > 0:
-        # Blur the background but keep the largest face sharp
         frame_with_blurred_background, largest_face = blur_background(frame, faces)
-        # put "green tick" on bottom right corner
-        cv2.putText(frame_with_blurred_background, "V face detected", (frame_with_blurred_background.shape[1] - 100, frame_with_blurred_background.shape[0] - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
         # Resize the largest face to a consistent size (e.g., 200x200)
         x, y, w, h = largest_face
         face = gray[y:y + h, x:x + w]
         resized_face = cv2.resize(face, (200, 200))
 
-        # Project the face into the Eigenface space
+        # Project the face into the EigenFace space
         current_projection = project_to_eigenfaces(resized_face, mean_face, eigen_vectors)
 
-        # Add the current projection to the list of last 'n' projections
-        last_n_projections.append(current_projection)
-        if len(last_n_projections) > n:
-            last_n_projections.pop(0)
+        if len(projection_history) > 0:
+            avg_projection = np.mean(projection_history, axis=0)
+            currentRMSE = np.sqrt(np.mean((current_projection - avg_projection) ** 2))
+            isDetected = rmse_peak_detection(currentRMSE, rmse_history)
 
-        # Calculate the rmse with respect to the mean projection of the last 'n' frames
-        if len(last_n_projections) > 1:
-            avg_projection = np.mean(last_n_projections, axis=0)
-            mse = np.mean((current_projection - avg_projection) ** 2)
         else:
-            mse = 0  # No rmse to compute for the first frame
-        rmse = np.sqrt(mse)
+            currentRMSE = None
 
-        rmse_history.append(rmse)
-        if len(rmse_history) > n*4:
-            rmse_history.pop(0)
-        main_history.append(rmse)
-        # Apply Savitzky-Golay filter to smooth the rmse signal
-        if len(rmse_history) < 20:
-            smoothed_rmse_history.append(None)
-            detection_history.append(None)
-        else:
-            smoothed_rmse = savgol_filter(rmse_history, len(rmse_history), polyorder)
-            smoothed_rmse_history.append(smoothed_rmse[-1])
-
-            # Detect peaks in the smoothed rmse signal
-            peaks, _ = find_peaks(smoothed_rmse, height=rmse_threshold)
-            p = predict_from_face(np.expand_dims(np.expand_dims(cv2.resize(resized_face, (48, 48)), -1), 0))
-            cv2.putText(frame_with_blurred_background, p, (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            if len(peaks) > 0 and p != "Neutral" and p != "Angry":
-                detection_history.append(1)
-                cv2.putText(frame_with_blurred_background, "Significant change detected!", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-            else:
-                detection_history.append(None)
-            # Track recent peaks for a certain number of frames
-
-            # Draw the face rectangle on the frame with blurred background
-            cv2.rectangle(frame_with_blurred_background, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
-            # Display the rmse on the frame
-            cv2.putText(frame_with_blurred_background, f'rmse: {rmse:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
-                        (0, 255, 0), 2)
+        return (currentRMSE, current_projection), isDetected
     else:
-        frame_with_blurred_background = frame  # If no face is detected, just show the original frame
-        cv2.putText(frame_with_blurred_background, "X No face", (frame_with_blurred_background.shape[1] - 100, frame_with_blurred_background.shape[0] - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        return None
 
-    # Display the frame with the blurred background
-    cv2.imshow("Webcam Feed", frame_with_blurred_background)
+def display_frame(frame: np.ndarray, text: str = "") -> None:
+    """
+    Function to display the frame with an optional text overlay
 
-    # Exit when 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    Will detect a face and blur the background, then display the frame with the text overlay
 
-    frame_count += 1
-# use matplotlib to plot the rmse history
-import matplotlib.pyplot as plt
+    :param frame: np.ndarray: The frame to display
+    :param text: str: The text to overlay on the frame
+    """
+    faces = face_cascade.detectMultiScale(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 1.1, 4)
+    if len(faces) > 0:
+        frame_with_blurred_background, _ = blur_background(frame, faces)
+        cv2.putText(frame_with_blurred_background, text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.imshow('Webcam', frame_with_blurred_background)
+    else:
+        cv2.imshow('Webcam', frame)
 
-plt.plot(main_history, label="rmse")
-plt.plot(smoothed_rmse_history, label="Smoothed rmse")
-plt.scatter(np.linspace(0, len(detection_history), len(detection_history)),
-            detection_history, color='red', label="Detection")
-plt.xlabel("Frame")
-plt.ylabel("rmse")
-plt.legend()
-plt.show()
-# Release resources and close the window
-cap.release()
-cv2.destroyAllWindows()
+
