@@ -92,7 +92,7 @@ const Home = () => {
     return (
         <div className="home-container">
             <div className="title-container">
-                <h1 className="game-title">Crackle.co</h1>
+                <h1 className="game-title">Krackle.co</h1>
                 <span 
                     className={`title-emoji ${isSpinning ? 'spinning' : ''}`} 
                     onClick={handleEmojiClick}
