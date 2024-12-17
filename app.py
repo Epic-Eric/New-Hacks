@@ -1,5 +1,5 @@
 import os 
-
+import psutil
 import socketio
 import secrets
 from fastapi import FastAPI
@@ -39,7 +39,9 @@ class Colors:
 # a = ap.parse_args()
 # mode = a.mode
 
-# Create the model
+process = psutil.Process(os.getpid())
+print(f"Memory before loading the model: {process.memory_info().rss / (1024 ** 2):.2f} MB")
+
 model = Sequential()
 
 # Add layers
@@ -59,6 +61,8 @@ model.add(Dense(1024, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(7, activation='softmax'))
 
+
+
 # Disable OpenCL to avoid unnecessary logs
 cv2.ocl.setUseOpenCL(False)
 
@@ -71,6 +75,8 @@ frame_rate: int | float = 5
 
 # Load pre-trained weights
 model.load_weights('newBackend/model.h5')
+
+print(f"Memory after loading the model: {process.memory_info().rss / (1024 ** 2):.2f} MB")
 
 # Function to predict emotion
 def predict_emotion(frame: np.ndarray) -> list:
@@ -129,6 +135,8 @@ app.add_middleware(
 
 # In-memory storage for lobbies
 lobbies = {}
+
+print(f"Memory after declaring app stuff: {process.memory_info().rss / (1024 ** 2):.2f} MB")
 
 # Root route for checking the server
 @app.get("/")
@@ -240,7 +248,6 @@ async def disconnect(sid):
 @sio.event
 async def webcam_data(sid, data):
     # Process the webcam data (base64 image)
-    print(f'data received: {data}')
     lobby_code = data['lobbyCode']
     lobby = lobbies.get(lobby_code)
 
@@ -273,6 +280,7 @@ async def webcam_data(sid, data):
             lobby['players'][player_number]['emotion_history'].append(history_append)
             if sum(item[1] for item in lobby['players'][player_number]['emotion_history']) / len(lobby['players'][player_number]['emotion_history']) > 0.3:
                 message = 'roundLost'
+                lobby['players'][player_number]['emotion_history'] = [(0, 0)]
         
     except:
         pass
