@@ -8,14 +8,9 @@ import base64
 import numpy as np
 from io import BytesIO
 from PIL import Image
-import time
-
-# from test import get_eigenFace_mse
-
-
+import uvicorn
 import time
 from typing import Literal
-
 import numpy as np
 import cv2
 from keras_core.models import Sequential
@@ -74,9 +69,10 @@ emotion_history: list[float] = []
 frame_rate: int | float = 5
 
 # Load pre-trained weights
-model.load_weights('newBackend/model.h5')
+model.load_weights('backend/model.h5')
 
 print(f"Memory after loading the model: {process.memory_info().rss / (1024 ** 2):.2f} MB")
+
 
 # Function to predict emotion
 def predict_emotion(frame: np.ndarray) -> list:
@@ -88,10 +84,19 @@ def predict_emotion(frame: np.ndarray) -> list:
     :return: A list of predictions for each detected face in the frame.
     :rtype: list
     """
-    facecasc = cv2.CascadeClassifier('newBackend/haarcascade_frontalface_default.xml')
+    preds = []
+    facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
-    preds = []
+
+
+    # _, largest_face = blur_background(frame, faces)
+        # Resize the largest face to a consistent size (e.g., 200x200)
+    # x, y, w, h = largest_face
+    # face = gray[y:y + h, x:x + w]
+    # cropped_img = np.expand_dims(np.expand_dims(cv2.resize(face, (48, 48)), -1), 0)
+    # prediction = model.predict(cropped_img, verbose=0)
+
 
     for (x, y, w, h) in faces:
         # Draw a rectangle around the face
@@ -103,11 +108,9 @@ def predict_emotion(frame: np.ndarray) -> list:
 
         # Predict emotion
         prediction = model.predict(cropped_img, verbose=0)
+    
+    
         preds.append(prediction[0])
-
-        # Get emotion with max probability
-        maxindex = int(np.argmax(prediction))
-        cv2.putText(frame, emotion_dict[maxindex], (x+20, y-60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
     return preds
 
@@ -252,7 +255,6 @@ async def webcam_data(sid, data):
     lobby = lobbies.get(lobby_code)
 
     base64_data = data['image'].split(",")[1]
-    # Decode the base64 image
     image_data = base64.b64decode(base64_data)
     player_number = 0
     for i, player in enumerate(lobby['players']):
@@ -263,7 +265,7 @@ async def webcam_data(sid, data):
     try:
         lobby['players'][player_number]['emotion_history'] = [
             entry for entry in lobby['players'][player_number]['emotion_history']
-            if (time.time() - lobby['round_start_time'] - entry[0]) <= 4
+            if (time.time() - lobby['round_start_time'] - entry[0]) <= 3
         ]
         
         image = Image.open(BytesIO(image_data))
@@ -274,11 +276,12 @@ async def webcam_data(sid, data):
 
         if emotions != []:
             pred = 0 
-            if emotions[0][3] + emotions[0][6] > 0.8:
+            if emotions[0][3] > 0.8:
                 pred = 1
+            
             history_append = (time.time() - lobby['round_start_time'], pred)
             lobby['players'][player_number]['emotion_history'].append(history_append)
-            if sum(item[1] for item in lobby['players'][player_number]['emotion_history']) / len(lobby['players'][player_number]['emotion_history']) > 0.3:
+            if len(lobby['players'][player_number]['emotion_history']) > 10 and sum(item[1] for item in lobby['players'][player_number]['emotion_history']) / len(lobby['players'][player_number]['emotion_history']) > 0.25:
                 message = 'roundLost'
                 lobby['players'][player_number]['emotion_history'] = [(0, 0)]
         
@@ -289,8 +292,8 @@ async def webcam_data(sid, data):
 
 
 # Run the FastAPI app
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="127.0.0.1", port=8000)  # Running on port 8000, as port 3000 is taken by npm start
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)  # Running on port 8000, as port 3000 is taken by npm start
 
 
         # lobby['players'][player_number]['emotion_history'] = [
