@@ -230,17 +230,21 @@ async def disconnect(sid):
     print(f"User disconnected: {sid}")
 
     # Remove player from any lobbies they were part of
+    
     for gameId, lobby in lobbies.items():
         playerIndex = next((i for i, p in enumerate(lobby['players']) if p['id'] == sid), None)
         if playerIndex is not None:
-            removedPlayer = lobby['players'].pop(playerIndex)
-            await sio.emit('playerLeft', removedPlayer, room=gameId)
+            if lobby['admin'] == sid:
+                del lobbies[gameId]
+                await sio.emit('lobbyClosed', {'message': 'Lobby has been closed by the admin.'}, room=gameId)
+            else:
+                removedPlayer = lobby['players'].pop(playerIndex)
+                await sio.emit('playerLeft', removedPlayer, room=gameId)
+            break
 
+    print(lobbies)
         # If the disconnected user was the admin, handle lobby closure
-        if lobby['admin'] == sid:
-            del lobbies[gameId]
-            await sio.emit('lobbyClosed', {'message': 'Lobby has been closed by the admin.'}, room=gameId)
-
+        
 
 # WebSocket route to handle webcam data and send back processing results
 @sio.event

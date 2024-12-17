@@ -148,7 +148,7 @@ const Game = () => {
 
 
         socket.on('webcam_response', (message) => {
-            console.log(message);
+            console.log('received something just now');
             if (message.message == 'roundLost') {
                 navigate('/lost');
             }
