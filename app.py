@@ -1,5 +1,4 @@
 import os 
-import psutil
 import socketio
 import secrets
 from fastapi import FastAPI
@@ -34,8 +33,6 @@ class Colors:
 # a = ap.parse_args()
 # mode = a.mode
 
-process = psutil.Process(os.getpid())
-print(f"Memory before loading the model: {process.memory_info().rss / (1024 ** 2):.2f} MB")
 
 model = Sequential()
 
@@ -71,7 +68,6 @@ frame_rate: int | float = 5
 # Load pre-trained weights
 model.load_weights('backend/model.h5')
 
-print(f"Memory after loading the model: {process.memory_info().rss / (1024 ** 2):.2f} MB")
 
 
 # Function to predict emotion
@@ -139,7 +135,6 @@ app.add_middleware(
 # In-memory storage for lobbies
 lobbies = {}
 
-print(f"Memory after declaring app stuff: {process.memory_info().rss / (1024 ** 2):.2f} MB")
 
 # Root route for checking the server
 @app.get("/")
