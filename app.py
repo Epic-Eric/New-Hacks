@@ -277,10 +277,11 @@ async def webcam_data(sid, data):
             pred = 0 
             if emotions[0][3] > 0.8:
                 pred = 1
-            
+            print(time.time() - lobby['round_start_time'] - lobby['players'][player_number]['emotion_history'][-1][0])
+            print(pred)
             history_append = (time.time() - lobby['round_start_time'], pred)
             lobby['players'][player_number]['emotion_history'].append(history_append)
-            if len(lobby['players'][player_number]['emotion_history']) > 10 and sum(item[1] for item in lobby['players'][player_number]['emotion_history']) / len(lobby['players'][player_number]['emotion_history']) > 0.25:
+            if len(lobby['players'][player_number]['emotion_history']) > 10 and sum(item[1] for item in lobby['players'][player_number]['emotion_history']) / len(lobby['players'][player_number]['emotion_history']) > 0.19:
                 message = 'roundLost'
                 lobby['players'][player_number]['emotion_history'] = [(0, 0)]
         
