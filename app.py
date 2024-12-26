@@ -184,8 +184,8 @@ async def joinLobby(sid, data):
     lobbyCode = data['lobbyCode']
     playerName = data['playerName']
     print(f"Join Lobby Event Received: LobbyCode={lobbyCode}, PlayerName={playerName}")
-    print(lobbies)
     lobby = lobbies.get(lobbyCode)
+
     if lobby:
         if len(lobby['players']) < lobby['settings']['maxPlayers']:
             if not lobby['round_start_time']:
@@ -252,7 +252,7 @@ async def webcam_data(sid, data):
     # Process the webcam data (base64 image)
     lobby_code = data['lobbyCode']
     lobby = lobbies.get(lobby_code)
-
+    print(lobby, flush=True)
     # base64_data = data['image'].split(",")[1]
     # image_data = base64.b64decode(base64_data)
 
