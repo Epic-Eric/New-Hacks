@@ -67,7 +67,7 @@ frame_rate: int | float = 5
 
 # Load pre-trained weights
 model.load_weights('backend/model.h5')
-
+facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
 
 
 # Function to predict emotion
@@ -81,7 +81,7 @@ def predict_emotion(frame: np.ndarray) -> list:
     :rtype: list
     """
     preds = []
-    facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
+    
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
 
