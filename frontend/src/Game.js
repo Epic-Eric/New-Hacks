@@ -98,9 +98,15 @@ const Game = () => {
             canvas.height = videoElement.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/jpeg');
+            // const imageData = canvas.toDataURL('image/jpeg');
 
-            socket.emit('webcam_data', { image: imageData, lobbyCode: lobby});
+            // socket.emit('webcam_data', { image: imageData, lobbyCode: lobby});
+            canvas.toBlob((blob) => {
+                if (blob) {
+                  socket.emit('webcam_data', { image: blob, lobbyCode: lobby}); // Send raw bytes
+                }
+              }, 'image/jpeg', 0.7); // Adjust the quality as needed (0.7 = 70% quality)
+            
         } else {
             console.log("Video element not ready yet.");
         }

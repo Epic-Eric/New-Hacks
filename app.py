@@ -253,8 +253,9 @@ async def webcam_data(sid, data):
     lobby_code = data['lobbyCode']
     lobby = lobbies.get(lobby_code)
 
-    base64_data = data['image'].split(",")[1]
-    image_data = base64.b64decode(base64_data)
+    # base64_data = data['image'].split(",")[1]
+    # image_data = base64.b64decode(base64_data)
+
     player_number = 0
     for i, player in enumerate(lobby['players']):
         if player['id'] == sid:
@@ -267,7 +268,7 @@ async def webcam_data(sid, data):
             if (time.time() - lobby['round_start_time'] - entry[0]) <= 3
         ]
         
-        image = Image.open(BytesIO(image_data))
+        image = Image.open(BytesIO(data['image']))
         # Convert to OpenCV format
         image_np = np.array(image)
 
@@ -277,8 +278,8 @@ async def webcam_data(sid, data):
             pred = 0 
             if emotions[0][3] > 0.8:
                 pred = 1
-            print(time.time() - lobby['round_start_time'] - lobby['players'][player_number]['emotion_history'][-1][0])
-            print(pred)
+            # print(time.time() - lobby['round_start_time'] - lobby['players'][player_number]['emotion_history'][-1][0])
+            # print(pred)
             history_append = (time.time() - lobby['round_start_time'], pred)
             lobby['players'][player_number]['emotion_history'].append(history_append)
             if len(lobby['players'][player_number]['emotion_history']) > 10 and sum(item[1] for item in lobby['players'][player_number]['emotion_history']) / len(lobby['players'][player_number]['emotion_history']) > 0.19:
