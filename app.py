@@ -168,6 +168,8 @@ async def createGame(sid, gameData):
     lobby = lobbies[gameId]
     player = {'id': sid, 'name': gameData['adminName'], 'emotion_history': [(0, 0)]}
     lobby['players'].append(player)
+
+    print(lobbies)
     # Admin joins the lobby room
     await sio.enter_room(sid, gameId)
 
@@ -252,7 +254,6 @@ async def webcam_data(sid, data):
     # Process the webcam data (base64 image)
     lobby_code = data['lobbyCode']
     lobby = lobbies.get(lobby_code)
-    print(lobby, flush=True)
     # base64_data = data['image'].split(",")[1]
     # image_data = base64.b64decode(base64_data)
 
