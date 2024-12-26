@@ -184,7 +184,7 @@ async def joinLobby(sid, data):
     lobbyCode = data['lobbyCode']
     playerName = data['playerName']
     print(f"Join Lobby Event Received: LobbyCode={lobbyCode}, PlayerName={playerName}")
-    
+    print(lobbies)
     lobby = lobbies.get(lobbyCode)
     if lobby:
         if len(lobby['players']) < lobby['settings']['maxPlayers']:
