@@ -1717,7 +1717,8 @@
         "asyncpg": {
             "version": "==0.27.0",
             "hashes": [
-                "sha256:def123abc456gh789ijklmnopqrstuvwxyz0123456789abcdef0123456789abcdef0123"
+                "sha256:def123abc456gh789ijklmnopqrstuvwxyz0123456789abcdef0123456789abcdef0123",
+                "sha256:720986d9a4705dd8a40fdf172036f5ae787225036a7eb46e704c45aa8f62c054"
             ],
             "index": "pypi"
         },
