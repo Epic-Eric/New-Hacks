@@ -1710,7 +1710,7 @@
             "version": "==0.3.0",
             "hashes": [
                 "sha256:abc123def456gh789ijklmnopqrstuvwxyz0123456789abcdef0123456789abcdef0123",
-                "sha256:3212c68a01ae138453a303626dc429aed4b3841a4af47c8901fdbdcda7e574c"
+                "sha256:3212c68a01ae138453a303626dc429aed4b3841a4af47c8901fdbdcda7e574c0"
             ],
             "index": "pypi"
         },
