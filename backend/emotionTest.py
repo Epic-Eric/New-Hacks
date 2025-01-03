@@ -9,10 +9,12 @@ from keras_core.models import Sequential
 from keras_core.layers import Dense, Dropout, Flatten
 from keras_core.layers import Conv2D, MaxPooling2D
 import os
+
 # import matplotlib.pyplot as plt
 
 # Suppress unnecessary logs
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 
 # Define Colors for CLI output
 class Colors:
@@ -22,10 +24,10 @@ class Colors:
     RESET = '\033[0m'
 
 # Command-line arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("--mode", help="train/display")
-a = ap.parse_args()
-mode = a.mode
+# ap = argparse.ArgumentParser()
+# ap.add_argument("--mode", help="train/display")
+# a = ap.parse_args()
+# mode = a.mode
 
 # Create the model
 model = Sequential()

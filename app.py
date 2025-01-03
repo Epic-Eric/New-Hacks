@@ -3,7 +3,6 @@ import socketio
 import secrets
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import base64
 import numpy as np
 from io import BytesIO
 from PIL import Image
@@ -15,24 +14,8 @@ import cv2
 from keras_core.models import Sequential
 from keras_core.layers import Dense, Dropout, Flatten
 from keras_core.layers import Conv2D, MaxPooling2D
-
-# import matplotlib.pyplot as plt
-# Suppress unnecessary logs
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-# Define Colors for CLI output
-class Colors:
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RESET = '\033[0m'
-
-# Command-line arguments
-# ap = argparse.ArgumentParser()
-# ap.add_argument("--mode", help="train/display")
-# a = ap.parse_args()
-# mode = a.mode
-
+import dotenv
+from supabase import create_client, Client
 
 model = Sequential()
 
@@ -54,67 +37,13 @@ model.add(Dropout(0.5))
 model.add(Dense(7, activation='softmax'))
 
 
-
 # Disable OpenCL to avoid unnecessary logs
 cv2.ocl.setUseOpenCL(False)
 
-# Emotion dictionary and history
-emotion_dict: dict[int, str] = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
-emotion_history: list[float] = []
-
-# Frame rate for webcam
-frame_rate: int | float = 5
 
 # Load pre-trained weights
 model.load_weights('backend/model.h5')
 facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
-
-
-# Function to predict emotion
-def predict_emotion(frame: np.ndarray) -> list:
-    """
-    Predicts the emotion from a given frame.
-
-    :param frame: The input frame from the webcam.
-    :type frame: np.ndarray
-    :return: A list of predictions for each detected face in the frame.
-    :rtype: list
-    """
-    preds = []
-    
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
-
-
-    # _, largest_face = blur_background(frame, faces)
-        # Resize the largest face to a consistent size (e.g., 200x200)
-    # x, y, w, h = largest_face
-    # face = gray[y:y + h, x:x + w]
-    # cropped_img = np.expand_dims(np.expand_dims(cv2.resize(face, (48, 48)), -1), 0)
-    # prediction = model.predict(cropped_img, verbose=0)
-
-
-    for (x, y, w, h) in faces:
-        # Draw a rectangle around the face
-        cv2.rectangle(frame, (x, y-50), (x+w, y+h+10), (255, 0, 0), 2)
-
-        # Process the region of interest
-        roi_gray = gray[y:y + h, x:x + w]
-        cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
-
-        # Predict emotion
-        prediction = model.predict(cropped_img, verbose=0)
-    
-    
-        preds.append(prediction[0])
-
-    return preds
-
-def predict_from_face(face: np.ndarray) -> Literal["Angry", "Disgusted", "Fearful", "Happy", "Neutral", "Sad", "Surprised"]:
-    prediction = model.predict(face, verbose=0)
-    maxindex = int(np.argmax(prediction))
-    return emotion_dict[maxindex]
-
 
 # Initialize FastAPI and Socket.IO
 app = FastAPI()
@@ -133,8 +62,12 @@ app.add_middleware(
 )
 
 # In-memory storage for lobbies
-lobbies = {}
+DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_KEY = os.getenv("DATABASE_KEY")
+supabase: Client = create_client(DATABASE_URL, DATABASE_KEY)
 
+
+lobbies = {}
 
 # Root route for checking the server
 @app.get("/")
@@ -153,51 +86,90 @@ async def createGame(sid, gameData):
     # Generate a unique game ID
     gameId = secrets.token_hex(4)
     
-    # Create a new lobby
-    lobbies[gameId] = {
-        'admin': sid,
-        'settings': {
-            'adminName': gameData['adminName'],
-            'timer': gameData['timer'],
-            'rounds': gameData['rounds'],
-            'maxPlayers': gameData['players']
-        },
-        'players': [],
+    # lobbies[gameId] = {
+    #     'admin': sid,
+    #     'adminName': gameData['adminName'],
+    #     'timer': gameData['timer'],
+    #     'rounds': gameData['rounds'],
+    #     'maxPlayers': gameData['players'],
+    #     'players': [],
+    #     'round_start_time': None
+    # }
+
+    # lobby = lobbies[gameId]
+    player = {'name': gameData['adminName'], 'emotion_history': [(0, 0)]}
+    lobbies[sid] = player
+    # lobby['players'].append(player)
+
+    response_creation = supabase.table('lobbies').insert({
+        'game_id': gameId,
+        'admin_sid': sid,
+        'admin_name': gameData['adminName'],
+        'timer': gameData['timer'],
+        'rounds': gameData['rounds'],
+        'max_players': gameData['players'],
         'round_start_time': None
-    }
-    lobby = lobbies[gameId]
-    player = {'id': sid, 'name': gameData['adminName'], 'emotion_history': [(0, 0)]}
-    lobby['players'].append(player)
+    }).execute()
 
-    print(lobbies)
-    # Admin joins the lobby room
+    response_join = supabase.table('players').insert({
+        'player_id': sid,
+        'game': gameId,
+        'player_name': gameData['adminName'],
+        'emotion_history': [(0, 0)]
+    }).execute()
+
+    try: 
+        response_creation.raise_when_api_error
+        print('Lobby created successfully')
+    except Exception as e:
+        print('Error creating lobby: ', e)
+
+    try: 
+        response_join.raise_when_api_error
+        print('Admin joined successfully')
+    except Exception as e:
+        print('Error joining admin: ', e)
+
+    # creates websocket room for all future emits
     await sio.enter_room(sid, gameId)
-
-    # Emit 'createGameResponse' back to the admin client
     await sio.emit('createGameResponse', {'success': True, 'gameId': gameId}, to=sid)
 
+    # admin joining the game
     await sio.emit('playerJoined', player, room=gameId)
-
-    # Emit successful join to the player
     await sio.emit('joinLobbyResponse', {'success': True, 'lobbyCode': gameId}, to=sid)
 
 @sio.event
 async def joinLobby(sid, data):
     lobbyCode = data['lobbyCode']
     playerName = data['playerName']
+
     print(f"Join Lobby Event Received: LobbyCode={lobbyCode}, PlayerName={playerName}")
-    lobby = lobbies.get(lobbyCode)
+    
+    # lobby = lobbies.get(lobbyCode)
+    lobby_info = supabase.table('lobbies').select().eq('game_id', lobbyCode).execute()
+    players_info = supabase.table('players').select().eq('game', lobbyCode).execute()
 
-    if lobby:
-        if len(lobby['players']) < lobby['settings']['maxPlayers']:
-            if not lobby['round_start_time']:
-                player = {'id': sid, 'name': playerName, 'emotion_history': [(0, 0)]}
-                lobby['players'].append(player)
+    try:
+        lobby_info.raise_when_api_error
+        players_info.raise_when_api_error
+        lobby_data = lobby_info.data[0]
+        players_info = players_info.data
+        if len(players_info) < lobby_data['max_players']:
+            if not lobby_data['round_start_time']:
+                player = {'name': playerName, 'emotion_history': [(0, 0)]}
+                lobbies[sid] = player
+                
+                players_names = [player['player_name'] for player in players_info] + [playerName]
 
-                players_names = [player['name'] for player in lobby['players']]
+                response_join = supabase.table('players').insert({
+                    'player_id': sid,
+                    'game': lobbyCode,
+                    'player_name': playerName,
+                    'emotion_history': [(0, 0)]
+                }).execute()
+                
+                # join player to the room
                 await sio.enter_room(sid, lobbyCode)
-
-                # Emit 'playerJoined' to the lobby room
                 await sio.emit('playerJoined', player, room=lobbyCode, to=lobbyCode)
 
                 # Emit successful join to the player
@@ -210,108 +182,124 @@ async def joinLobby(sid, data):
             await sio.emit('joinLobbyResponse', {'success': False, 'message': 'Lobby is full.'}, to=sid)
         
     
-    else:
+    except Exception as e:
         # Lobby not found
+        print('Error joining lobby: ', e)
         await sio.emit('joinLobbyResponse', {'success': False, 'message': 'Lobby not found.'}, to=sid)
 
 @sio.event
 async def startGame(sid, lobbyCode):
 
-    lobby = lobbies.get(lobbyCode)
-    if lobby and lobby['admin'] == sid:
+    lobby = supabase.table('lobbies').select().eq('game_id', lobbyCode).execute().data[0]
+    players = supabase.table('players').select().eq('game', lobbyCode).execute().data
+    if lobby and lobby['admin_sid'] == sid:
         # Emit 'gameStarted' to all players in the lobby
-        lobby['round_start_time'] = time.time()
-        players_names = [player['name'] for player in lobby['players']]
-        await sio.emit('gameStarted', {'gameSettings': lobby['settings'], 'room': lobbyCode, 'players': players_names}, to=lobbyCode)
+        response = supabase.table('lobbies').update({
+            'round_start_time': time.time()
+        }).eq('game_id', lobbyCode).execute()
+
+        players_names = [player['player_name'] for player in players]
+        settings = {
+            'timer': lobby['timer'],
+            'rounds': lobby['rounds'],
+            'maxPlayers': lobby['max_players']
+        }
+        await sio.emit('gameStarted', {'gameSettings': settings, 'room': lobbyCode, 'players': players_names}, to=lobbyCode)
     else:
         # Unauthorized or lobby not found
         await sio.emit('startGameResponse', {'success': False, 'message': 'Unauthorized or lobby not found.'}, to=sid)
+        # If the disconnected user was the admin, handle lobby closure
 
 @sio.event
 async def disconnect(sid):
-    print(f"User disconnected: {sid}")
+    player_response = supabase.table("players").select("*").eq("player_id", sid).execute()
+    if not player_response.data:
+        print('no player found')
+        return  # Player not found; nothing to do
 
-    # Remove player from any lobbies they were part of
-    
-    for gameId, lobby in lobbies.items():
-        playerIndex = next((i for i, p in enumerate(lobby['players']) if p['id'] == sid), None)
-        if playerIndex is not None:
-            if lobby['admin'] == sid:
-                del lobbies[gameId]
-                await sio.emit('lobbyClosed', {'message': 'Lobby has been closed by the admin.'}, room=gameId)
-            else:
-                removedPlayer = lobby['players'].pop(playerIndex)
-                await sio.emit('playerLeft', removedPlayer, room=gameId)
-            break
+    player = player_response.data[0]
+    game_id = player["game"]
 
-    print(lobbies)
-        # If the disconnected user was the admin, handle lobby closure
-        
+    # Check if the player is the admin of the lobby
+    lobby_response = supabase.table("lobbies").select("*").eq("game_id", game_id).execute()
+    if not lobby_response.data:
+        print('no lobby found')
+        return  # Lobby not found; nothing to do
+
+    lobby = lobby_response.data[0]
+    if lobby["admin_sid"] == sid:
+        lobbies.pop(sid)
+        supabase.table("lobbies").delete().eq("game_id", game_id).execute()
+        print('lobby closed')
+        await sio.emit('lobbyClosed', {'message': 'Lobby has been closed by the admin.'}, room=game_id)
+    else:
+        player_response = supabase.table("players").select("*").eq("player_id", sid).execute()
+        player = player_response.data[0] if player_response.data else None
+        lobbies.pop(sid)
+        supabase.table("players").delete().eq("player_id", sid).execute()
+
+        if player:
+            await sio.emit("playerLeft", player, room=game_id)
+
+    # Leave the Socket.IO room
+    await sio.leave_room(sid, game_id)
 
 # WebSocket route to handle webcam data and send back processing results
 @sio.event
 async def webcam_data(sid, data):
-    # Process the webcam data (base64 image)
     lobby_code = data['lobbyCode']
-    lobby = lobbies.get(lobby_code)
-    # base64_data = data['image'].split(",")[1]
-    # image_data = base64.b64decode(base64_data)
 
-    player_number = 0
-    for i, player in enumerate(lobby['players']):
-        if player['id'] == sid:
-            player_number = i
     message = None
 
     try:
-        lobby['players'][player_number]['emotion_history'] = [
-            entry for entry in lobby['players'][player_number]['emotion_history']
-            if (time.time() - lobby['round_start_time'] - entry[0]) <= 3
+        lobby = supabase.table('lobbies').select('round_start_time').eq('game_id', lobby_code).execute().data[0]
+        player = lobbies.get(sid)
+        round_start_time = lobby['round_start_time']
+        player_emotion_history = [
+            entry for entry in player['emotion_history']
+            if (time.time() - round_start_time - entry[0]) <= 3
         ]
         
         image = Image.open(BytesIO(data['image']))
-        # Convert to OpenCV format
         image_np = np.array(image)
 
         emotions = predict_emotion(image_np)
-
         if emotions != []:
             pred = 0 
             if emotions[0][3] > 0.8:
                 pred = 1
-            # print(time.time() - lobby['round_start_time'] - lobby['players'][player_number]['emotion_history'][-1][0])
-            # print(pred)
             history_append = (time.time() - lobby['round_start_time'], pred)
-            lobby['players'][player_number]['emotion_history'].append(history_append)
-            if len(lobby['players'][player_number]['emotion_history']) > 10 and sum(item[1] for item in lobby['players'][player_number]['emotion_history']) / len(lobby['players'][player_number]['emotion_history']) > 0.19:
+            player_emotion_history.append(history_append)
+            if len(player_emotion_history) > 8 and sum(item[1] for item in player_emotion_history) / len(player_emotion_history) > 0.2:
                 message = 'roundLost'
-                lobby['players'][player_number]['emotion_history'] = [(0, 0)]
+                player_emotion_history = [(0, 0)]
+
+            player['emotion_history'] = player_emotion_history
         
     except:
         pass
 
     await sio.emit('webcam_response', {'message': message}, to=sid)
 
+def predict_emotion(frame: np.ndarray) -> list:
+    preds = []
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+
+    for (x, y, w, h) in faces:
+        # Draw a rectangle around the face
+        cv2.rectangle(frame, (x, y-50), (x+w, y+h+10), (255, 0, 0), 2)
+
+        # Process the region of interest
+        roi_gray = gray[y:y + h, x:x + w]
+        cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
+
+        # Predict emotion
+        prediction = model.predict(cropped_img, verbose=0)
+        preds.append(prediction[0])
+
+    return preds
 
 # Run the FastAPI app
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)  # Running on port 8000, as port 3000 is taken by npm start
-
-
-        # lobby['players'][player_number]['emotion_history'] = [
-        #         entry for entry in lobby['players'][player_number]['emotion_history']
-        #         if (time.time() - lobby['round_start_time'] - entry[0]) <= 6
-        # ]
-
-        # history = lobby['players'][player_number]['emotion_history']
-        # result= get_eigenFace_mse(image_np, history)
-        
-        # if result != None:
-        #     history_append, game_over = (time.time() - lobby['round_start_time'], result[0]), result[1]
-        #     print('face detected')
-        #     if game_over == True:
-        #         message = 'roundLost'
-        # else:
-        #     history_append = (time.time() - lobby['round_start_time'], (None, []))
-        #     print('still no face detected')     
-        # lobby['players'][player_number]['emotion_history'].append(history_append)

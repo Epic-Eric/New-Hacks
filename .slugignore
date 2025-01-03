@@ -3,3 +3,5 @@ journal.txt
 updates.txt
 /backend/test.py
 requirements.txt
+frontend/
+.env
