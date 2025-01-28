@@ -16,6 +16,8 @@ from keras_core.layers import Dense, Dropout, Flatten
 from keras_core.layers import Conv2D, MaxPooling2D
 import dotenv
 from supabase import create_client, Client
+from pytube import Search
+import random
 
 model = Sequential()
 
@@ -44,6 +46,21 @@ cv2.ocl.setUseOpenCL(False)
 # Load pre-trained weights
 model.load_weights('backend/model.h5')
 facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
+
+
+
+# Function to fetch YouTube videos
+def fetch_youtube_videos(query="funny videos", max_results=5):
+    try:
+        search = Search(query)
+        videos = search.results  # Get all results
+        random.shuffle(videos)  # Shuffle the results to make them random
+        selected_videos = videos[:max_results]  # Pick the first 'max_results' from the shuffled list
+        # Generate embed URLs for each video
+        video_links = [f"https://www.youtube.com/embed/{video.video_id}?autoplay=1" for video in selected_videos]
+        return video_links
+    except Exception as e:
+        return {"error": str(e)}
 
 # Initialize FastAPI and Socket.IO
 app = FastAPI()
@@ -209,6 +226,19 @@ async def startGame(sid, lobbyCode):
         # Unauthorized or lobby not found
         await sio.emit('startGameResponse', {'success': False, 'message': 'Unauthorized or lobby not found.'}, to=sid)
         # If the disconnected user was the admin, handle lobby closure
+
+# Endpoint to fetch YouTube video links
+@app.get("/fetch_videos")
+async def get_videos():
+    videos = fetch_youtube_videos()
+    if "error" in videos:
+        return {"success": False, "error": videos["error"]}
+    return {"success": True, "videos": videos}
+
+# Example root route
+@app.get("/")
+async def root():
+    return {"message": "YouTube Video Fetcher is running."}
 
 @sio.event
 async def disconnect(sid):
