@@ -292,15 +292,17 @@ async def webcam_data(sid, data):
         
         image = Image.open(BytesIO(data['image']))
         image_np = np.array(image)
-
+        
         emotions = predict_emotion(image_np)
+        print(emotions)
         if emotions != []:
             pred = 0 
+            print(emotions)
             if emotions[0][3] > 0.8:
                 pred = 1
             history_append = (time.time() - lobby['round_start_time'], pred)
             player_emotion_history.append(history_append)
-            if len(player_emotion_history) > 8 and sum(item[1] for item in player_emotion_history) / len(player_emotion_history) > 0.2:
+            if len(player_emotion_history) > 10 and sum(item[1] for item in player_emotion_history) / len(player_emotion_history) > 0.2:
                 message = 'roundLost'
                 player_emotion_history = [(0, 0)]
 
@@ -310,6 +312,9 @@ async def webcam_data(sid, data):
         pass
 
     await sio.emit('webcam_response', {'message': message}, to=sid)
+
+
+
 
 def predict_emotion(frame: np.ndarray) -> list:
     preds = []

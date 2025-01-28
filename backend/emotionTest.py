@@ -60,7 +60,7 @@ emotion_history: list[float] = []
 frame_rate: int | float = 5
 
 # Load pre-trained weights
-model.load_weights('newBackend/model.h5')
+model.load_weights('backend/model.h5')
 
 # Function to predict emotion
 def predict_emotion(frame: np.ndarray) -> list:
@@ -72,7 +72,7 @@ def predict_emotion(frame: np.ndarray) -> list:
     :return: A list of predictions for each detected face in the frame.
     :rtype: list
     """
-    facecasc = cv2.CascadeClassifier('newBackend/haarcascade_frontalface_default.xml')
+    facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
     preds = []
@@ -169,10 +169,7 @@ if __name__ == '__main__':
             if time.time() - no_face > 1:
                 print(f"{Colors.RED}❎ No face detected{Colors.RESET}")
                 no_face = time.time()
-        for i in emotions:
-            if i[3] + i[6] >= 0.8:
-                flag = True
-                emotion_history.append(time.time() - start_Time)
+        print(emotions)
         if flag:
             index = 0
             happySurpriseLast.append(time.time() - start_Time)
