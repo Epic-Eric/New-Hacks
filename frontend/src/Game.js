@@ -102,7 +102,7 @@ const Game = () => {
                         lobbyCode,
                     });
                 }
-              }, 'image/jpeg', 0.7); // Adjust the quality as needed (0.7 = 70% quality)
+              }, 'image/jpeg', 0.8); // Adjust the quality as needed (0.7 = 70% quality)
             
         } else {
             console.log("Video element not ready yet.");

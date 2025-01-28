@@ -103,17 +103,6 @@ async def createGame(sid, gameData):
     # Generate a unique game ID
     gameId = secrets.token_hex(4)
     
-    # lobbies[gameId] = {
-    #     'admin': sid,
-    #     'adminName': gameData['adminName'],
-    #     'timer': gameData['timer'],
-    #     'rounds': gameData['rounds'],
-    #     'maxPlayers': gameData['players'],
-    #     'players': [],
-    #     'round_start_time': None
-    # }
-
-    # lobby = lobbies[gameId]
     player = {'name': gameData['adminName'], 'emotion_history': [(0, 0)]}
     lobbies[sid] = player
     # lobby['players'].append(player)
@@ -317,9 +306,18 @@ async def webcam_data(sid, data):
 
 
 def predict_emotion(frame: np.ndarray) -> list:
-    preds = []
+    """
+    Predicts the emotion from a given frame.
+
+    :param frame: The input frame from the webcam.
+    :type frame: np.ndarray
+    :return: A list of predictions for each detected face in the frame.
+    :rtype: list
+    """
+    facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+    preds = []
 
     for (x, y, w, h) in faces:
         # Draw a rectangle around the face
