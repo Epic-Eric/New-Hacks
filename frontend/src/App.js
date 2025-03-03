@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import io from 'socket.io-client';
+import { OpenCvProvider } from 'opencv-react';
 import Home from './Home';
 import Admin from './Admin';
 import Game from './Game'; // Import the Game component
@@ -17,12 +18,6 @@ function App() {
         function requestWebcamData() {
             socket.emit('requestWebcamData');
         }
-
-        // Handle the received webcam data
-        socket.on('webcamData', (data) => {
-            console.log('Received webcam data:', data);
-            // Process the received webcam data (e.g., display it on the webpage)
-        });
 
         // Example usage: Request webcam data when a button is clicked
         const button = document.getElementById('requestWebcamButton');
@@ -39,15 +34,17 @@ function App() {
     }, []);
 
     return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/game" element={<Game />} /> {/* Route for Game */}
-                <Route path="/lost" element={<Lost />} />
-                {/* Add more routes as needed */}
-            </Routes>
-        </Router>
+        <OpenCvProvider>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/game" element={<Game />} /> {/* Route for Game */}
+                    <Route path="/lost" element={<Lost />} />
+                    {/* Add more routes as needed */}
+                </Routes>
+            </Router>
+        </OpenCvProvider>
     );
 }
 

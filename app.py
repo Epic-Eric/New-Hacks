@@ -40,13 +40,13 @@ model.add(Dense(7, activation='softmax'))
 
 
 # Disable OpenCL to avoid unnecessary logs
-cv2.ocl.setUseOpenCL(False)
+
 
 
 # Load pre-trained weights
 model.load_weights('backend/model.h5')
-facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
-
+# facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
+cv2.ocl.setUseOpenCL(False)
 
 
 # Function to fetch YouTube videos
@@ -291,7 +291,7 @@ async def webcam_data(sid, data):
                 pred = 1
             history_append = (time.time() - lobby['round_start_time'], pred)
             player_emotion_history.append(history_append)
-            if len(player_emotion_history) > 10 and sum(item[1] for item in player_emotion_history) / len(player_emotion_history) > 0.2:
+            if len(player_emotion_history) > 10 and sum(item[1] for item in player_emotion_history) / len(player_emotion_history) > 0.3:
                 message = 'roundLost'
                 player_emotion_history = [(0, 0)]
 

@@ -37,7 +37,6 @@ const Home = () => {
         socket.on('joinLobbyResponse', ({ success, lobbyCode, message, playerList }) => {
             if (success) {
                 console.log(`Successfully joined lobby: ${lobbyCode}`);
-                console.log(playerList);
                 setPlayerList(playerList);
                 setIsLoading(true);
             } else {
