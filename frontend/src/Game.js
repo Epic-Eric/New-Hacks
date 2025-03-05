@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import socket from "./socket";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, } from "react-router-dom";
 import "./Game.css";
 import GameStartingLoading from './GameStartingLoading';
-import * as tf from '@tensorflow/tfjs';
-import { useOpenCv } from 'opencv-react';
+import * as faceapi from '@vladmandic/face-api';
 
 const Game = () => {
     const location = useLocation();
@@ -18,113 +17,29 @@ const Game = () => {
     const [videoList, setVideoList] = useState([]);
     const [currentVideoUrl, setCurrentVideoUrl] = useState("");
     const [model, setModel] = useState(null);
-    const [faceCascade, setFaceCascade] = useState(null);
     const [gameStartingLoading, setLoading] = useState(true);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const navigate = useNavigate();
-    const opencv = useOpenCv();
-    const [isOpenCvLoaded, setIsOpenCvLoaded] = useState(false);
+    const params = new URLSearchParams(location.search);
+    const lobby = params.get('lobby');
 
-    useEffect(() => {
-        if (opencv && opencv.cv) {
-            setIsOpenCvLoaded(true);
-        }
-    }, [opencv]);
 
     function sleep(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    const detectEmotion = async (imageData) => {
-        try {
-            if (!faceCascade || !model || !opencv.cv) return null;
-
-            // Convert image data to OpenCV format
-            const img = opencv.cv.matFromImageData(imageData);
-            const gray = new opencv.cv.Mat();
-            opencv.cv.cvtColor(img, gray, opencv.cv.COLOR_RGBA2GRAY);
-
-            // Detect faces
-            const faces = new opencv.cv.RectVector();
-            faceCascade.detectMultiScale(gray, faces, 1.1, 3, 0);
-
-            let result = null;
-            
-            // Process the first detected face
-            if (faces.size() > 0) {
-                const face = faces.get(0);
-                // Create a rectangle for face region
-                const rect = new opencv.cv.Rect(face.x, face.y, face.width, face.height);
-                const faceRegion = gray.roi(rect);
-                
-                // Resize face region to match model input size
-                const resized = new opencv.cv.Mat();
-                opencv.cv.resize(faceRegion, resized, new opencv.cv.Size(48, 48));
-                
-                // Convert to tensor
-                const tensor = tf.tensor4d(resized.data, [1, 48, 48, 1])
-                    .toFloat()
-                    .div(255.0);
-
-                // Get prediction
-                const prediction = await model.predict(tensor).data();
-                const emotions = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral'];
-                const maxIndex = prediction.indexOf(Math.max(...prediction));
-                result = emotions[maxIndex];
-
-                // Cleanup OpenCV objects
-                tensor.dispose();
-                resized.delete();
-                faceRegion.delete();
-            }
-
-            // Cleanup
-            img.delete();
-            gray.delete();
-            faces.delete();
-
-            return result;
-        } catch (error) {
-            console.error('Error in emotion detection:', error);
-            return null;
-        }
-    };
-
     useEffect(() => {
         // Load the model and cascade classifier when the component mounts
         const loadModel = async () => {
-            if (!isOpenCvLoaded) return;
-            
-            try {
-                // Load TensorFlow.js model
-                const loadedModel = await tf.loadLayersModel('/model/model.json');
-                setModel(loadedModel);
-                console.log("Model loaded");
-                
-                const cascade = new opencv.cv.CascadeClassifier();
-                cascade.load('/haarcascade_frontalface_default.xml');
-                setFaceCascade(cascade);
-
-                await sleep(1000);
-            } catch (error) {
-                console.error('Error loading model:', error);
-            } finally {
-                setLoading(false);
-            }
+            const modelUrl = process.env.PUBLIC_URL + '/models';
+            await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
+            await faceapi.nets.faceExpressionNet.loadFromUri(modelUrl);
+            sleep(1000);
+            setLoading(false);
         };
-    
-        if (isOpenCvLoaded) {
-            loadModel();
-        }
-
-        // Cleanup
-        return () => {
-            if (faceCascade) {
-                faceCascade.delete();
-            }
-        };
-    }, [isOpenCvLoaded]);
+        loadModel();
+    }, []);
 
     const handleCountdownEnd = () => {
         setShowCountdown(false);
@@ -224,17 +139,10 @@ const Game = () => {
             }
         };
 
-        if (isOpenCvLoaded) {
-            startWebcam();
-        }
+        startWebcam();
+
 
         const intervalId = setInterval(captureAndSendFrame, 125);
-
-        socket.on("webcam_response", (message) => {
-            if (message.message === "roundLost") {
-                navigate("/lost");
-            }
-        });
 
         return () => {
             clearInterval(intervalId);
@@ -242,39 +150,25 @@ const Game = () => {
                 videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
             }
         };
-    }, [isOpenCvLoaded]);
+    }, []);
 
     // Modify captureAndSendFrame to use local emotion detection
-    const captureAndSendFrame = async () => {
-        const videoElement = videoRef.current;
-        const canvas = canvasRef.current;
-    
-        if (!videoElement || !canvas || !videoElement.videoWidth || !videoElement.videoHeight) {
-            return;
-        }
-    
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-    
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-    
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const emotion = await detectEmotion(imageData);
-        
-        if (emotion) {
-            const lobbyCode = new URLSearchParams(location.search).get("lobby");
-            socket.emit("emotion_detected", {
-                emotion,
-                lobbyCode,
-            });
+    const captureAndSendFrame = async () => {    
+        const detections = await faceapi
+            .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+            .withFaceExpressions();
+            socket.emit('playerdeath', lobby)
+        if (detections.length > 0) {
+            if (detections[0]?.expressions?.happy > 0.8) {
+                navigate('/lost');
+            }
         }
     };
 
     if (gameStartingLoading) {
         return (
             <div>
-            {showCountdown && <GameStartingLoading onCountdownEnd={handleCountdownEnd} />}
+            {showCountdown && <GameStartingLoading onCountdownEnd={setShowCountdown(false)} />}
             </div>
         );
     }

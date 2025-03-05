@@ -267,7 +267,6 @@ async def disconnect(sid):
 @sio.event
 async def webcam_data(sid, data):
     lobby_code = data['lobbyCode']
-
     message = None
 
     try:
@@ -278,10 +277,9 @@ async def webcam_data(sid, data):
             entry for entry in player['emotion_history']
             if (time.time() - round_start_time - entry[0]) <= 3
         ]
-        
         image = Image.open(BytesIO(data['image']))
         image_np = np.array(image)
-        
+
         emotions = predict_emotion(image_np)
         print(emotions)
         if emotions != []:
@@ -297,8 +295,8 @@ async def webcam_data(sid, data):
 
             player['emotion_history'] = player_emotion_history
         
-    except:
-        pass
+    except Exception as e:
+        print("Error, ", e)
 
     await sio.emit('webcam_response', {'message': message}, to=sid)
 
