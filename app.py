@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import time
-import numpy as np
 from supabase import create_client, Client
 from pytube import Search
 import random
