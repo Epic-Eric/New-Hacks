@@ -25,9 +25,9 @@ const Game = () => {
     const lobby = params.get('lobby');
 
 
-    // function sleep(ms) {
-    //     return new Promise((resolve) => setTimeout(resolve, ms));
-    // }
+    function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
 
     useEffect(() => {
         // Load the model and cascade classifier when the component mounts
@@ -35,6 +35,7 @@ const Game = () => {
             const modelUrl = process.env.PUBLIC_URL + '/models';
             await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
             await faceapi.nets.faceExpressionNet.loadFromUri(modelUrl);
+            sleep(1000);
             setLoading(false);
         };
         loadModel();
@@ -44,25 +45,25 @@ const Game = () => {
         setShowCountdown(false);
         };
 
-    // useEffect(() => {
-    //     // Fetch video list from the backend
-    //     const fetchVideos = async () => {
-    //         try {
-    //             const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/fetch_videos`);
-    //             const data = await response.json();
-    //             if (data.success) {
-    //                 setVideoList(data.videos);
-    //                 setCurrentVideoUrl(data.videos[0]); // Set the first video as the default
-    //             } else {
-    //                 console.error("Error fetching videos:", data.error);
-    //             }
-    //         } catch (error) {
-    //             console.error("Error:", error);
-    //         }
-    //     };
+    useEffect(() => {
+        // Fetch video list from the backend
+        const fetchVideos = async () => {
+            try {
+                const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/fetch_videos`);
+                const data = await response.json();
+                if (data.success) {
+                    setVideoList(data.videos);
+                    setCurrentVideoUrl(data.videos[0]); // Set the first video as the default
+                } else {
+                    console.error("Error fetching videos:", data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        };
 
-    //     // fetchVideos();
-    // }, []);
+        // fetchVideos();
+    }, []);
 
     const changeVideo = () => {
         if (videoList.length > 0) {
