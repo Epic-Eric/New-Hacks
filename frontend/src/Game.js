@@ -25,9 +25,9 @@ const Game = () => {
     const lobby = params.get('lobby');
 
 
-    function sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
-    }
+    // function sleep(ms) {
+    //     return new Promise((resolve) => setTimeout(resolve, ms));
+    // }
 
     useEffect(() => {
         // Load the model and cascade classifier when the component mounts
