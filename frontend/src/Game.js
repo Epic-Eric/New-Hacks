@@ -45,25 +45,25 @@ const Game = () => {
         setShowCountdown(false);
         };
 
-    useEffect(() => {
-        // Fetch video list from the backend
-        const fetchVideos = async () => {
-            try {
-                const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/fetch_videos`);
-                const data = await response.json();
-                if (data.success) {
-                    setVideoList(data.videos);
-                    setCurrentVideoUrl(data.videos[0]); // Set the first video as the default
-                } else {
-                    console.error("Error fetching videos:", data.error);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        };
+    // useEffect(() => {
+    //     // Fetch video list from the backend
+    //     const fetchVideos = async () => {
+    //         try {
+    //             const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/fetch_videos`);
+    //             const data = await response.json();
+    //             if (data.success) {
+    //                 setVideoList(data.videos);
+    //                 setCurrentVideoUrl(data.videos[0]); // Set the first video as the default
+    //             } else {
+    //                 console.error("Error fetching videos:", data.error);
+    //             }
+    //         } catch (error) {
+    //             console.error("Error:", error);
+    //         }
+    //     };
 
-        // fetchVideos();
-    }, []);
+    //     // fetchVideos();
+    // }, []);
 
     const changeVideo = () => {
         if (videoList.length > 0) {
