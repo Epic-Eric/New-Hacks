@@ -35,7 +35,6 @@ const Game = () => {
             const modelUrl = process.env.PUBLIC_URL + '/models';
             await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
             await faceapi.nets.faceExpressionNet.loadFromUri(modelUrl);
-            sleep(1000);
             setLoading(false);
         };
         loadModel();
