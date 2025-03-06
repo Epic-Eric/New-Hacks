@@ -62,7 +62,7 @@ const Game = () => {
             }
         };
 
-        fetchVideos();
+        // fetchVideos();
     }, []);
 
     const changeVideo = () => {
@@ -103,7 +103,7 @@ const Game = () => {
             );
             return () => clearInterval(countdown);
         } else {
-            changeVideo();
+            // changeVideo();
             setTimer(roundTime);
             setRound((prevRound) => prevRound - 1);
         }
