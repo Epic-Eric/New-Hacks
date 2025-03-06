@@ -12,12 +12,6 @@ import './App.css';
 const socket = io('https://www.krackle.co'); // Connect to the WebSocket server
 
 function App() {
-    useEffect(() => {
-        // Function to request webcam data
-        function requestWebcamData() {
-            socket.emit('requestWebcamData');
-        }
-    }, []);
 
     return (
 

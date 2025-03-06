@@ -49,7 +49,7 @@ const Game = () => {
         // Fetch video list from the backend
         const fetchVideos = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/fetch_videos`);
+                const response = await fetch(`https://${process.env.REACT_APP_SERVER_URL}/fetch_videos`);
                 const data = await response.json();
                 if (data.success) {
                     setVideoList(data.videos);
