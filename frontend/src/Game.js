@@ -153,7 +153,10 @@ const Game = () => {
     }, []);
 
     // Modify captureAndSendFrame to use local emotion detection
-    const captureAndSendFrame = async () => {    
+    const captureAndSendFrame = async () => {  
+        if (!videoRef.current || videoRef.current.readyState < videoRef.current.HAVE_ENOUGH_DATA) {
+            return;
+        }  
         const detections = await faceapi
             .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
             .withFaceExpressions();
