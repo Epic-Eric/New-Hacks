@@ -3,50 +3,12 @@ import socketio
 import secrets
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import numpy as np
-from io import BytesIO
-from PIL import Image
 import uvicorn
 import time
-from typing import Literal
 import numpy as np
-import cv2
-from keras_core.models import Sequential
-from keras_core.layers import Dense, Dropout, Flatten
-from keras_core.layers import Conv2D, MaxPooling2D
-import dotenv
 from supabase import create_client, Client
 from pytube import Search
 import random
-
-model = Sequential()
-
-# Add layers
-model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(48, 48, 1)))
-model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
-
-model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
-
-model.add(Flatten())
-model.add(Dense(1024, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(7, activation='softmax'))
-
-
-# Disable OpenCL to avoid unnecessary logs
-
-
-
-# Load pre-trained weights
-model.load_weights('backend/model.h5')
-# facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
-cv2.ocl.setUseOpenCL(False)
 
 
 # Function to fetch YouTube videos
@@ -84,8 +46,6 @@ DATABASE_KEY = os.getenv("DATABASE_KEY")
 supabase: Client = create_client(DATABASE_URL, DATABASE_KEY)
 
 
-lobbies = {}
-
 # Root route for checking the server
 @app.get("/")
 async def root():
@@ -104,7 +64,6 @@ async def createGame(sid, gameData):
     gameId = secrets.token_hex(4)
     
     player = {'name': gameData['adminName'], 'emotion_history': [(0, 0)]}
-    lobbies[sid] = player
     # lobby['players'].append(player)
 
     response_creation = supabase.table('lobbies').insert({
@@ -163,7 +122,6 @@ async def joinLobby(sid, data):
         if len(players_info) < lobby_data['max_players']:
             if not lobby_data['round_start_time']:
                 player = {'name': playerName, 'emotion_history': [(0, 0)]}
-                lobbies[sid] = player
                 
                 players_names = [player['player_name'] for player in players_info] + [playerName]
 
@@ -247,14 +205,12 @@ async def disconnect(sid):
 
     lobby = lobby_response.data[0]
     if lobby["admin_sid"] == sid:
-        lobbies.pop(sid)
         supabase.table("lobbies").delete().eq("game_id", game_id).execute()
         print('lobby closed')
         await sio.emit('lobbyClosed', {'message': 'Lobby has been closed by the admin.'}, room=game_id)
     else:
         player_response = supabase.table("players").select("*").eq("player_id", sid).execute()
         player = player_response.data[0] if player_response.data else None
-        lobbies.pop(sid)
         supabase.table("players").delete().eq("player_id", sid).execute()
 
         if player:
@@ -262,74 +218,6 @@ async def disconnect(sid):
 
     # Leave the Socket.IO room
     await sio.leave_room(sid, game_id)
-
-# WebSocket route to handle webcam data and send back processing results
-@sio.event
-async def webcam_data(sid, data):
-    lobby_code = data['lobbyCode']
-    message = None
-
-    try:
-        lobby = supabase.table('lobbies').select('round_start_time').eq('game_id', lobby_code).execute().data[0]
-        player = lobbies.get(sid)
-        round_start_time = lobby['round_start_time']
-        player_emotion_history = [
-            entry for entry in player['emotion_history']
-            if (time.time() - round_start_time - entry[0]) <= 3
-        ]
-        image = Image.open(BytesIO(data['image']))
-        image_np = np.array(image)
-
-        emotions = predict_emotion(image_np)
-        print(emotions)
-        if emotions != []:
-            pred = 0 
-            print(emotions)
-            if emotions[0][3] > 0.8:
-                pred = 1
-            history_append = (time.time() - lobby['round_start_time'], pred)
-            player_emotion_history.append(history_append)
-            if len(player_emotion_history) > 10 and sum(item[1] for item in player_emotion_history) / len(player_emotion_history) > 0.3:
-                message = 'roundLost'
-                player_emotion_history = [(0, 0)]
-
-            player['emotion_history'] = player_emotion_history
-        
-    except Exception as e:
-        print("Error, ", e)
-
-    await sio.emit('webcam_response', {'message': message}, to=sid)
-
-
-
-
-def predict_emotion(frame: np.ndarray) -> list:
-    """
-    Predicts the emotion from a given frame.
-
-    :param frame: The input frame from the webcam.
-    :type frame: np.ndarray
-    :return: A list of predictions for each detected face in the frame.
-    :rtype: list
-    """
-    facecasc = cv2.CascadeClassifier('backend/haarcascade_frontalface_default.xml')
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
-    preds = []
-
-    for (x, y, w, h) in faces:
-        # Draw a rectangle around the face
-        cv2.rectangle(frame, (x, y-50), (x+w, y+h+10), (255, 0, 0), 2)
-
-        # Process the region of interest
-        roi_gray = gray[y:y + h, x:x + w]
-        cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
-
-        # Predict emotion
-        prediction = model.predict(cropped_img, verbose=0)
-        preds.append(prediction[0])
-
-    return preds
 
 # Run the FastAPI app
 if __name__ == "__main__":
