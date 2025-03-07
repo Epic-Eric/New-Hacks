@@ -9,20 +9,6 @@ from supabase import create_client, Client
 from pytube import Search
 import random
 
-
-# Function to fetch YouTube videos
-def fetch_youtube_videos(query="funny videos", max_results=5):
-    try:
-        search = Search(query)
-        videos = search.results  # Get all results
-        random.shuffle(videos)  # Shuffle the results to make them random
-        selected_videos = videos[:max_results]  # Pick the first 'max_results' from the shuffled list
-        # Generate embed URLs for each video
-        video_links = [f"https://www.youtube.com/embed/{video.video_id}?autoplay=1" for video in selected_videos]
-        return video_links
-    except Exception as e:
-        return {"error": str(e)}
-
 # Initialize FastAPI and Socket.IO
 app = FastAPI()
 sio = socketio.AsyncServer(async_mode='asgi', 
@@ -50,6 +36,29 @@ supabase: Client = create_client(DATABASE_URL, DATABASE_KEY)
 async def root():
     return {"message": "Socket.IO Backend is running."}
 
+# Function to fetch YouTube videos
+def fetch_youtube_videos(query="funny videos", max_results=5):
+    try:
+        search = Search(query)
+        videos = search.results  # Get all results
+        random.shuffle(videos)  # Shuffle the results to make them random
+        selected_videos = videos[:max_results]  # Pick the first 'max_results' from the shuffled list
+        # Generate embed URLs for each video
+        video_links = [f"https://www.youtube.com/embed/{video.video_id}?autoplay=1" for video in selected_videos]
+        return video_links
+    except Exception as e:
+        return {"error": str(e)}
+    
+def check_game_over(lobby):
+    players = supabase.table('players').select().eq('game', lobby).execute()
+    players.raise_when_api_error
+    round_statistics = {}
+    for player in players.data:
+        if not player['lost_time']:
+            return False
+        else:
+            round_statistics[player['player_name']] = player['lost_time']
+    return round_statistics
 
 @sio.event
 async def createGame(sid, gameData):
@@ -113,6 +122,8 @@ async def joinLobby(sid, data):
                     'player_name': playerName,
                     'lost_time': None,
                 }).execute()
+
+                response_join.raise_when_api_error
                 
                 # join player to the room
                 await sio.enter_room(sid, lobbyCode)
@@ -170,8 +181,7 @@ async def root():
 async def smiled(sid, lobby):
     death_time = time.time()
     lobby_response = supabase.table("lobbies").select("*").eq("game_id", lobby).execute()
-    if not lobby_response.data:
-        return
+    lobby_response.raise_when_api_error
     start_time = lobby_response.data[0]['round_start_time']
     death_time = death_time - start_time
     update_response = supabase.table("players").update({
@@ -180,6 +190,9 @@ async def smiled(sid, lobby):
     update_response.raise_when_api_error
 
     await sio.emit('playerSmiled', {'playerId': sid}, room=lobby)
+    game_over_info = check_game_over(lobby)
+    if game_over_info:
+        await sio.emit('gameOver', {'statistics': game_over_info}, room=lobby)
 
 
 @sio.event
@@ -209,6 +222,11 @@ async def disconnect(sid):
 
     # Leave the Socket.IO room
     await sio.leave_room(sid, game_id)
+
+    game_over_info = check_game_over(lobby)
+    if game_over_info:
+        await sio.emit('gameOver', {'statistics': game_over_info}, room=lobby)
+
 
 
 

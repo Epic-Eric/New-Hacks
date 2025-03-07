@@ -3,6 +3,7 @@ import socket from "./socket";
 import { useLocation, useNavigate, } from "react-router-dom";
 import "./Game.css";
 import GameStartingLoading from './GameStartingLoading';
+import Lost from './Lost';
 import * as faceapi from '@vladmandic/face-api';
 
 const Game = () => {
@@ -17,9 +18,9 @@ const Game = () => {
     const [videoList, setVideoList] = useState([]);
     const [currentVideoUrl, setCurrentVideoUrl] = useState("");
     const [gameStartingLoading, setLoading] = useState(true);
+    const [lost, setLost] = useState(false);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const navigate = useNavigate();
     const params = new URLSearchParams(location.search);
     const lobby = params.get('lobby');
 
@@ -80,6 +81,11 @@ const Game = () => {
 
         socket.on("playerSmiled", (player) => {
             console.log(`Player smiled: ${player.name}`);
+        });
+
+        socket.on("gameOver", (data) => {
+            console.log("Game over, all players smiled!");
+            console.log(data.statistics);
         });
 
         // Listen for players leaving
@@ -163,7 +169,7 @@ const Game = () => {
         if (detections.length > 0) {
             if (detections[0]?.expressions?.happy > 0.8) {
                 socket.emit('smiled', lobby);
-                navigate('/lost');
+                setLost(true);
             }
         }
     };
@@ -174,6 +180,10 @@ const Game = () => {
             {showCountdown && <GameStartingLoading onCountdownEnd={setShowCountdown(false)} />}
             </div>
         );
+    }
+
+    if (lost) {
+        return <Lost />;
     }
 
     return (
