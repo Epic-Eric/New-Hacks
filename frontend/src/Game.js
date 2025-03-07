@@ -16,7 +16,6 @@ const Game = () => {
     const [currentPlayers, setPlayers] = useState(players);
     const [videoList, setVideoList] = useState([]);
     const [currentVideoUrl, setCurrentVideoUrl] = useState("");
-    const [model, setModel] = useState(null);
     const [gameStartingLoading, setLoading] = useState(true);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -35,15 +34,14 @@ const Game = () => {
             const modelUrl = process.env.PUBLIC_URL + '/models';
             await faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl);
             await faceapi.nets.faceExpressionNet.loadFromUri(modelUrl);
-            sleep(1000);
-            setLoading(false);
+            sleep(500);
         };
         loadModel();
     }, []);
 
     const handleCountdownEnd = () => {
         setShowCountdown(false);
-        };
+    };
 
     useEffect(() => {
         // Fetch video list from the backend
@@ -74,11 +72,14 @@ const Game = () => {
     };
 
     useEffect(() => {
-        console.log(socket.id);
         // Listen for players joining
         socket.on("playerJoined", (player) => {
-            setPlayers((prev) => [...prev, player.name]);
+            setPlayers((prev) => [...prev, player]);
             console.log(`Game display: player joined: ${player.name}`);
+        });
+
+        socket.on("playerSmiled", (player) => {
+            console.log(`Player smiled: ${player.name}`);
         });
 
         // Listen for players leaving
@@ -97,8 +98,8 @@ const Game = () => {
     // Countdown timer effect
     useEffect(() => {
         if (timer > 0) {
-            const countdown = setInterval(
-                () => setTimer((prev) => Math.max(prev - 1, 0)),
+            const countdown = setInterval(() => 
+                setTimer((prev) => Math.max(prev - 1, 0)),
                 1000
             );
             return () => clearInterval(countdown);
@@ -138,9 +139,8 @@ const Game = () => {
                 console.error("Error accessing webcam:", error);
             }
         };
-
         startWebcam();
-
+        setLoading(false);
 
         const intervalId = setInterval(captureAndSendFrame, 125);
 
@@ -160,9 +160,9 @@ const Game = () => {
         const detections = await faceapi
             .detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions())
             .withFaceExpressions();
-            socket.emit('playerdeath', lobby)
         if (detections.length > 0) {
             if (detections[0]?.expressions?.happy > 0.8) {
+                socket.emit('smiled', lobby);
                 navigate('/lost');
             }
         }

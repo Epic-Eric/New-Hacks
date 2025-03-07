@@ -50,19 +50,14 @@ supabase: Client = create_client(DATABASE_URL, DATABASE_KEY)
 async def root():
     return {"message": "Socket.IO Backend is running."}
 
-# Socket.IO Event Handling
-@sio.event
-async def connect(sid, environ):
-    print(f"A user connected: {sid}")
 
 @sio.event
 async def createGame(sid, gameData):
-    print(f'Create Game Event Received: {gameData}')
     
     # Generate a unique game ID
     gameId = secrets.token_hex(4)
     
-    player = {'name': gameData['adminName'], 'emotion_history': [(0, 0)]}
+    player = {"name": gameData['adminName'], "id": sid}
     # lobby['players'].append(player)
 
     response_creation = supabase.table('lobbies').insert({
@@ -72,27 +67,18 @@ async def createGame(sid, gameData):
         'timer': gameData['timer'],
         'rounds': gameData['rounds'],
         'max_players': gameData['players'],
-        'round_start_time': None
+        'round_start_time': None,
     }).execute()
 
     response_join = supabase.table('players').insert({
         'player_id': sid,
         'game': gameId,
         'player_name': gameData['adminName'],
-        'emotion_history': [(0, 0)]
+        'lost_time': None
     }).execute()
 
-    try: 
-        response_creation.raise_when_api_error
-        print('Lobby created successfully')
-    except Exception as e:
-        print('Error creating lobby: ', e)
-
-    try: 
-        response_join.raise_when_api_error
-        print('Admin joined successfully')
-    except Exception as e:
-        print('Error joining admin: ', e)
+    response_creation.raise_when_api_error
+    response_join.raise_when_api_error
 
     # creates websocket room for all future emits
     await sio.enter_room(sid, gameId)
@@ -106,8 +92,6 @@ async def createGame(sid, gameData):
 async def joinLobby(sid, data):
     lobbyCode = data['lobbyCode']
     playerName = data['playerName']
-
-    print(f"Join Lobby Event Received: LobbyCode={lobbyCode}, PlayerName={playerName}")
     
     # lobby = lobbies.get(lobbyCode)
     lobby_info = supabase.table('lobbies').select().eq('game_id', lobbyCode).execute()
@@ -120,15 +104,14 @@ async def joinLobby(sid, data):
         players_info = players_info.data
         if len(players_info) < lobby_data['max_players']:
             if not lobby_data['round_start_time']:
-                player = {'name': playerName, 'emotion_history': [(0, 0)]}
-                
+                player = {"name": playerName, "id": sid}
                 players_names = [player['player_name'] for player in players_info] + [playerName]
 
                 response_join = supabase.table('players').insert({
                     'player_id': sid,
                     'game': lobbyCode,
                     'player_name': playerName,
-                    'emotion_history': [(0, 0)]
+                    'lost_time': None,
                 }).execute()
                 
                 # join player to the room
@@ -147,7 +130,6 @@ async def joinLobby(sid, data):
     
     except Exception as e:
         # Lobby not found
-        print('Error joining lobby: ', e)
         await sio.emit('joinLobbyResponse', {'success': False, 'message': 'Lobby not found.'}, to=sid)
 
 @sio.event
@@ -173,7 +155,6 @@ async def startGame(sid, lobbyCode):
         await sio.emit('startGameResponse', {'success': False, 'message': 'Unauthorized or lobby not found.'}, to=sid)
         # If the disconnected user was the admin, handle lobby closure
 
-# Endpoint to fetch YouTube video links
 @app.get("/fetch_videos")
 async def get_videos():
     videos = fetch_youtube_videos()
@@ -181,31 +162,42 @@ async def get_videos():
         return {"success": False, "error": videos["error"]}
     return {"success": True, "videos": videos}
 
-# Example root route
 @app.get("/")
 async def root():
     return {"message": "YouTube Video Fetcher is running."}
 
 @sio.event
+async def smiled(sid, lobby):
+    death_time = time.time()
+    lobby_response = supabase.table("lobbies").select("*").eq("game_id", lobby).execute()
+    if not lobby_response.data:
+        return
+    start_time = lobby_response.data[0]['round_start_time']
+    death_time = death_time - start_time
+    update_response = supabase.table("players").update({
+        "lost_time": death_time
+    }).eq("player_id", sid).execute()
+    update_response.raise_when_api_error
+
+    await sio.emit('playerSmiled', {'playerId': sid}, room=lobby)
+
+
+@sio.event
 async def disconnect(sid):
     player_response = supabase.table("players").select("*").eq("player_id", sid).execute()
     if not player_response.data:
-        print('no player found')
         return  # Player not found; nothing to do
 
     player = player_response.data[0]
     game_id = player["game"]
 
-    # Check if the player is the admin of the lobby
     lobby_response = supabase.table("lobbies").select("*").eq("game_id", game_id).execute()
     if not lobby_response.data:
-        print('no lobby found')
         return  # Lobby not found; nothing to do
 
     lobby = lobby_response.data[0]
     if lobby["admin_sid"] == sid:
         supabase.table("lobbies").delete().eq("game_id", game_id).execute()
-        print('lobby closed')
         await sio.emit('lobbyClosed', {'message': 'Lobby has been closed by the admin.'}, room=game_id)
     else:
         player_response = supabase.table("players").select("*").eq("player_id", sid).execute()
@@ -217,6 +209,8 @@ async def disconnect(sid):
 
     # Leave the Socket.IO room
     await sio.leave_room(sid, game_id)
+
+
 
 # Run the FastAPI app
 if __name__ == "__main__":

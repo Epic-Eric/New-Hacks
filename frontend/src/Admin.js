@@ -41,7 +41,7 @@ const Admin = () => {
         // Listen for players joining
         socket.on('playerJoined', (player) => {
             setCurrentPlayers(prev => [...prev, player]);
-            console.log(`Admin display: Player joined: ${player.name}`);
+            console.log(`Admin display: Player joined: ${player}`);
         });
 
         // Listen for players leaving
@@ -76,10 +76,7 @@ const Admin = () => {
     };
 
     const handleStartGame = () => {
-        console.log("Starting game with settings:", { timer, rounds, players: currentPlayers.length });
-        // Emit 'startGame' event to backend
         socket.emit('startGame', lobbyCode);
-        //navigate('/game?name=' + searchParams.get('name'), { state: { timer: parseInt(timer), rounds: parseInt(rounds), players: currentPlayers.map(p => p.name) } });
     };
 
     const handleCopyLink = () => {
@@ -91,10 +88,6 @@ const Admin = () => {
             .catch(err => {
                 console.error('Failed to copy: ', err);
             });
-    };
-
-    const handleGoHome = () => {
-        navigate('/');
     };
 
     return (
