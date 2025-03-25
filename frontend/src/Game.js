@@ -201,12 +201,12 @@ const Game = () => {
         <div className="game-container">
             <div className="top-bar">
                 <h1 className="game-title">
-                    krackle.io <span className="emoji">😂</span>
+                      <span className="emoji">😂</span>
                 </h1>
-                <div className="game-info">
+                {/* <div className="game-info">
                     <p>Timer: {timer}s</p>
                     <p>Round: {round}</p>
-                </div>
+                </div> */}
             </div>
 
             <div className="main-content">
@@ -238,14 +238,14 @@ const Game = () => {
                     </div>
                 </div>
 
-                <div className="death-log">
+                {/* <div className="death-log">
                     <h2>Death Log</h2>
                     <ul>
                         {deathLog.map((log, index) => (
                             <li key={index}>{log}</li>
                         ))}
                     </ul>
-                </div>
+                </div> */}
             </div>
 
             <canvas 
