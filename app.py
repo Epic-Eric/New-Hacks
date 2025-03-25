@@ -187,7 +187,9 @@ async def smiled(sid, lobby):
     update_response = supabase.table("players").update({
         "lost_time": death_time
     }).eq("player_id", sid).execute()
+    print(death_time)
     update_response.raise_when_api_error
+    print(sid)
 
     await sio.emit('playerSmiled', {'playerId': sid}, room=lobby)
     game_over_info = check_game_over(lobby)
@@ -232,4 +234,4 @@ async def disconnect(sid):
 
 # Run the FastAPI app
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)  # Running on port 8000, as port 3000 is taken by npm start
+    uvicorn.run(app, host="127.0.0.1", port=8001)  # Running on port 8000, as port 3000 is taken by npm start

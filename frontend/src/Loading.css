@@ -43,31 +43,37 @@
 
 .lobby-players {
     margin-top: 30px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     padding: 20px;
     width: 80%;
     max-width: 500px;
+    color: #333;
 }
 
 .player-list {
     list-style: none;
     padding: 0;
+    margin-bottom: 1.5rem;
 }
 
 .player-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    margin: 5px 0;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 5px;
-    font-size: 1.2rem;
+    background-color: #f0f0f0;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    font-weight: bold;
 }
 
-.player-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transition: background 0.3s ease;
+.player-emoji {
+    font-size: 1.2rem;
+    margin-right: 6px;
+}
+
+.player-name {
+    font-size: 1rem;
+    color: #333;
 }
 
 /* Reuse the gradient animation from Home.css */
@@ -134,4 +140,87 @@
     100% {
         transform: scale(1);
     }
+}
+
+.lobby-players ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Game Results Timeline styles */
+.game-results {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    width: 90%;
+    max-width: 800px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.game-results h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+    font-size: 1.8rem;
+}
+
+.timeline-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.timeline {
+    position: relative;
+    padding: 40px 0;
+}
+
+.timeline-bar {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
+.player-marker {
+    transition: transform 0.3s ease;
+}
+
+.player-marker:hover {
+    transform: translateX(-50%) scale(1.2);
+    z-index: 10;
+}
+
+.player-emoji {
+    filter: drop-shadow(0 0 5px white);
+}
+
+.marker-line {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
+
+.time-marker {
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.survival-time {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* Add a fun animation for the player markers */
+@keyframes popIn {
+    0% { transform: translateX(-50%) scale(0); }
+    60% { transform: translateX(-50%) scale(1.2); }
+    100% { transform: translateX(-50%) scale(1); }
+}
+
+.player-marker {
+    animation: popIn 0.5s forwards;
+    animation-delay: calc(var(--index) * 0.1s);
+    opacity: 0;
+    animation-fill-mode: forwards;
 }

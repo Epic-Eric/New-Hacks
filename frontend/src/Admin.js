@@ -17,7 +17,6 @@ const Admin = () => {
     const [error, setError] = useState('');
 
     const navigate = useNavigate(); // Initialize navigate
-    const [searchParams] = useSearchParams()
 
 
     useEffect(() => {
@@ -34,7 +33,6 @@ const Admin = () => {
         });
 
         socket.on('gameStarted', ({ gameSettings, room, players }) => {
-            console.log("Received 'gameStarted' event:", gameSettings, 'lobby: ', room, 'players: ', players);
             navigate('/game?lobby=' + room, { state: { name: adminName, gameSettings, players } });
         });
 
@@ -76,6 +74,7 @@ const Admin = () => {
     };
 
     const handleStartGame = () => {
+
         socket.emit('startGame', lobbyCode);
     };
 

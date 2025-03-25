@@ -1,18 +1,42 @@
 /* Admin.css */
 
+/* Add animations from Home.css */
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 .admin-container {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    background-color: #5c4d98;
+    padding: 2rem;
+    background: linear-gradient(
+        -45deg, 
+        #4834d4,    /* Darker purple */
+        #686de0,    /* Bright purple-blue */
+        #be2edd,    /* Vibrant pink-purple */
+        #ff4757
+    );
+    background-size: 300% 300%;
+    animation: gradientAnimation 8s ease infinite;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
     color: white;
-    font-family: 'Arial', sans-serif;
 }
 
-h1 {
-    margin-bottom: 20px;
+.admin-container h1 {
+    margin-bottom: 2rem;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
+    font-size: 3rem;
 }
 
 .admin-content {
@@ -21,7 +45,17 @@ h1 {
     justify-content: space-between;
 }
 
-/* Player List with Boxes and Emojis */
+.create-game, .lobby-info {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 600px;
+    color: #333;
+}
+
+/* Player List with Boxes and Emojis
 .player-list {
     width: 30%;
     display: flex;
@@ -31,7 +65,7 @@ h1 {
 
 .player-list h2 {
     margin-bottom: 10px;
-}
+} */
 
 .player-icons {
     display: flex;
@@ -44,11 +78,12 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    background-color: #6b5fb5;
-    border-radius: 8px;
-    padding: 6px;
+    background-color: #686de0;
+    border-radius: 10px;
+    padding: 8px;
     width: 100%;
     box-sizing: border-box;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .player-emoji {
@@ -63,42 +98,91 @@ h1 {
 
 /* Settings and Controls */
 .settings {
-    width: 60%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 1rem;
 }
 
-label {
+/* Specifically target admin container labels to avoid affecting Home.css */
+.admin-container label {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 95%;
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.admin-container input[type="number"], 
+.admin-container input[type="text"] {
     width: 100%;
-    color: white;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    border: 2px solid #6c5ce7;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
 }
 
-input[type="number"], input[type="text"] {
-    padding: 8px;
-    font-size: 1rem;
-    width: 60%;
-    margin-left: 10px;
+.admin-container input[type="number"]:focus, 
+.admin-container input[type="text"]:focus {
+    outline: none;
+    border-color: #a363d9;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 1rem;
+.admin-container button {
+    padding: 0.8rem 2rem;
+    font-size: 1.2rem;
     cursor: pointer;
     color: white;
     border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 1rem;
+}
+
+.admin-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .start-game-button {
-    background-color: #48c774;
+    background-color: #00b894;
 }
 
-.invite-button {
-    background-color: #007bff;
+.copy-link-button, .invite-button {
+    background-color: #0984e3;
 }
 
 .home-button {
-    background-color: #ff5c5c;
+    background-color: #d63031;
+}
+
+.error-message {
+    color: #d63031;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.lobby-info h2 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.lobby-info ul {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.lobby-info li {
+    background-color: #f0f0f0;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    font-weight: bold;
 }

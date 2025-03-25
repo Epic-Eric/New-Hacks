@@ -16,6 +16,7 @@ const Home = () => {
     const [isSpinning, setIsSpinning] = useState(false);
     const [playerList, setPlayerList] = useState([]);
 
+
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const lobby = params.get('lobby');

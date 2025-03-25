@@ -84,8 +84,7 @@ const Game = () => {
         });
 
         socket.on("gameOver", (data) => {
-            console.log("Game over, all players smiled!");
-            console.log(data.statistics);
+            console.log("Game over, received statistics:", data.statistics);
         });
 
         // Listen for players leaving
@@ -173,6 +172,18 @@ const Game = () => {
             }
         }
     };
+
+    useEffect(() => {
+        // Listen for gameOver event even if this player already lost
+        socket.on("gameOver", (data) => {
+            console.log("Game over, received statistics:", data.statistics);
+            // No need to do anything here, the Lost component will handle this
+        });
+
+        return () => {
+            socket.off("gameOver");
+        };
+    }, []);
 
     if (gameStartingLoading) {
         return (

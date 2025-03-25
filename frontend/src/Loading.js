@@ -29,7 +29,7 @@ const Loading = ({playerList}) => {
             <span className="loading-emoji">😄</span>
             <div className="lobby-players">
                 <h3>Players in Lobby:</h3>
-                <ul className="player-list">
+                <ul >
                     {players.map((player, index) => (
                         <li key={index} className="player-item">{player}</li>
                     ))}
